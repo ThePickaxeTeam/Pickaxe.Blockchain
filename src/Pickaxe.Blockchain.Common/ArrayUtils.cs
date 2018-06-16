@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Pickaxe.Blockchain.Common
 {
@@ -10,6 +11,18 @@ namespace Pickaxe.Blockchain.Common
             arr1.CopyTo(result, 0);
             arr2.CopyTo(result, arr1.Length);
 
+            return result;
+        }
+
+        public static T[] Combine<T>(params T[][] arrays)
+        {
+            T[] result = new T[arrays.Sum(a => a.Length)];
+            int offset = 0;
+            foreach (T[] array in arrays)
+            {
+                Buffer.BlockCopy(array, 0, result, offset, array.Length);
+                offset += array.Length;
+            }
             return result;
         }
 

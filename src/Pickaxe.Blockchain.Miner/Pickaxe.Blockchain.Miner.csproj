@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
@@ -9,8 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj" />
     <ProjectReference Include="..\Pickaxe.Blockchain.Common\Pickaxe.Blockchain.Common.csproj" />
-    <ProjectReference Include="..\Pickaxe.Blockchain.Domain\Pickaxe.Blockchain.Domain.csproj" />
+    <ProjectReference Include="..\Pickaxe.Blockchain.Contracts\Pickaxe.Blockchain.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
