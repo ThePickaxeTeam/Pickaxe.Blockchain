@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,9 +26,22 @@ namespace Pickaxe.Blockchain.Clients
 
         public async Task<Response<MiningJob>> GetMiningJob(string minerId)
         {
-            // Create a request to Node
-            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"miningjobs/{minerId}");
+            // Create a GET request to Node
+            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"api/miningjobs/{minerId}");
             return await SendRequest<MiningJob>(requestMessage).ConfigureAwait(false);
+        }
+
+        public async Task<Response<EmptyPayload>> SubmitMiningJob(MiningJobResult result, string minerId)
+        {
+            // Create a POST request to Node
+            var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/miningjobs/{minerId}");
+            requestMessage.Content = SerializeRequestAsJson(result);
+            return await SendRequest<EmptyPayload>(requestMessage).ConfigureAwait(false);
+        }
+
+        private static StringContent SerializeRequestAsJson<T>(T request)
+        {
+            return new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
         }
 
         private HttpRequestMessage BuildRequestMessage(HttpMethod httpMethod, string location, string queryString = "")
