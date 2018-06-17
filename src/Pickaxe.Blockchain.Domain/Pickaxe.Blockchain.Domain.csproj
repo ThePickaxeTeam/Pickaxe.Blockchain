@@ -4,4 +4,12 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Nethereum.Web3" Version="2.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj" />
+  </ItemGroup>
+
 </Project>

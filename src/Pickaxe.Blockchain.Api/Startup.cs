@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Pickaxe.Blockchain.Domain;
 
 namespace Pickaxe.Blockchain.Api
 {
@@ -24,6 +25,8 @@ namespace Pickaxe.Blockchain.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddSingleton<INodeService, NodeService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

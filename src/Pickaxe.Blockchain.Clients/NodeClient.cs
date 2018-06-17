@@ -2,17 +2,14 @@
 using Pickaxe.Blockchain.Contracts;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.Clients
 {
-    public class NodeClient
+    public class NodeClient : INodeClient
     {
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
@@ -24,17 +21,17 @@ namespace Pickaxe.Blockchain.Clients
             _baseUrl = baseUrl.TrimEnd('/');
         }
 
-        public async Task<Response<MiningJob>> GetMiningJob(string minerId)
+        public async Task<Response<MiningJob>> GetMiningJob(string minerAddress)
         {
             // Create a GET request to Node
-            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"api/miningjobs/{minerId}");
+            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"api/miningjobs/{minerAddress}");
             return await SendRequest<MiningJob>(requestMessage).ConfigureAwait(false);
         }
 
-        public async Task<Response<EmptyPayload>> SubmitMiningJob(MiningJobResult result, string minerId)
+        public async Task<Response<EmptyPayload>> SubmitMiningJob(MiningJobResult result, string minerAddress)
         {
             // Create a POST request to Node
-            var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/miningjobs/{minerId}");
+            var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/miningjobs/{minerAddress}");
             requestMessage.Content = SerializeRequestAsJson(result);
             return await SendRequest<EmptyPayload>(requestMessage).ConfigureAwait(false);
         }

@@ -21,17 +21,28 @@ namespace Pickaxe.Blockchain.Miner
 
         private static async Task MainAsync(string[] args)
         {
-            string nodeBaseUrl = "http://localhost:64149";//args[0];
-            string minerId = "1";//args[1];
+            string nodeBaseUrl;
+            string minerAddress;
+            if (args.Length < 2)
+            {
+                nodeBaseUrl = "http://localhost:64149";
+                minerAddress = "687422eEA2cB73B5d3e242bA5456b782919AFc85";
+            }
+            else
+            {
+                nodeBaseUrl = args[0];
+                minerAddress = args[1];
+            }
+
             TimeSpan maxJobDuration = new TimeSpan(0, 0, 5);
-            NodeClient nodeClient = new NodeClient(nodeBaseUrl);
+            INodeClient nodeClient = new NodeClient(nodeBaseUrl);
             Stopwatch stopwatch = new Stopwatch();
 
             do
             {
                 stopwatch.Start();
 
-                MiningJob job = await GetMiningJob(nodeClient, minerId).ConfigureAwait(false);
+                MiningJob job = await GetMiningJob(nodeClient, minerAddress).ConfigureAwait(false);
 
                 string difficultyCheck = new string('0', job.Difficulty);
                 byte[] precomputedData = GetPrecomputedData(job);
@@ -49,7 +60,7 @@ namespace Pickaxe.Blockchain.Miner
                             nonce,
                             ticks,
                             guess,
-                            minerId,
+                            minerAddress,
                             5).ConfigureAwait(false);
                         Console.WriteLine($"Submitting mining result {(submitted ? "successful" : "failed")}.");
                         break;
@@ -74,11 +85,11 @@ namespace Pickaxe.Blockchain.Miner
         }
 
         private static async Task<bool> SubmitMiningResult(
-            NodeClient nodeClient,
+            INodeClient nodeClient,
             ulong nonce,
             long ticks,
             string hash,
-            string minerId,
+            string minerAddress,
             int maxRetries)
         {
             MiningJobResult result = new MiningJobResult
@@ -93,20 +104,20 @@ namespace Pickaxe.Blockchain.Miner
             do
             {
                 retries++;
-                response = await nodeClient.SubmitMiningJob(result, minerId).ConfigureAwait(false);
+                response = await nodeClient.SubmitMiningJob(result, minerAddress).ConfigureAwait(false);
             } while (response.Status == Status.Failed && retries < maxRetries);
 
             return response.Status == Status.Success;
         }
 
         private static async Task<MiningJob> GetMiningJob(
-            NodeClient nodeClient,
-            string minerId)
+            INodeClient nodeClient,
+            string minerAddress)
         {
             Response<MiningJob> response;
             do
             {
-                response = await nodeClient.GetMiningJob(minerId).ConfigureAwait(false);
+                response = await nodeClient.GetMiningJob(minerAddress).ConfigureAwait(false);
             } while (response.Status == Status.Failed);
 
             return response.Payload;

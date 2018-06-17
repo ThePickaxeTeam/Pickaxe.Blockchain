@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pickaxe.Blockchain.Contracts\Pickaxe.Blockchain.Contracts.csproj" />
+    <ProjectReference Include="..\Pickaxe.Blockchain.Domain\Pickaxe.Blockchain.Domain.csproj" />
   </ItemGroup>
 
 </Project>

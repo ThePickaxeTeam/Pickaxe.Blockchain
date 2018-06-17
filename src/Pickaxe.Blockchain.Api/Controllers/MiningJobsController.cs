@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pickaxe.Blockchain.Contracts;
+using Pickaxe.Blockchain.Domain;
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
@@ -12,9 +13,17 @@ namespace Pickaxe.Blockchain.Api.Controllers
     [Route("api/MiningJobs")]
     public class MiningJobsController : ControllerBase
     {
-        // GET: api/MiningJobs/5
-        [HttpGet("{minerId}", Name = "Get")]
-        public IActionResult Get(string minerId)
+        INodeService _nodeService;
+
+        public MiningJobsController(
+            INodeService nodeService)
+        {
+            _nodeService = nodeService;
+        }
+
+        // GET: api/MiningJobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
+        [HttpGet("{minerAddress}", Name = "Get")]
+        public IActionResult Get(string minerAddress)
         {
             MiningJob job = new MiningJob
             {
@@ -27,9 +36,9 @@ namespace Pickaxe.Blockchain.Api.Controllers
             return Ok(job);
         }
 
-        // POST: api/MiningJobs/5
-        [HttpPost("{minerId}", Name = "Post")]
-        public IActionResult Post(string minerId, [FromBody]MiningJobResult value)
+        // POST: api/MiningJobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
+        [HttpPost("{minerAddress}", Name = "Post")]
+        public IActionResult Post(string minerAddress, [FromBody]MiningJobResult value)
         {
             return Ok();
         }
