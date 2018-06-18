@@ -1,7 +1,6 @@
 ﻿using Pickaxe.Blockchain.Domain.Models;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Pickaxe.Blockchain.Domain
@@ -10,15 +9,18 @@ namespace Pickaxe.Blockchain.Domain
     {
         private const int Difficulty = 4;
 
+        private ITransactionService _transactionService;
+
         private BlockingCollection<Block> _blockchain;
         private ConcurrentDictionary<string, Transaction> _pendingTransactions;
-        private ConcurrentDictionary<string, IList<Block>> _miningRequests;
+        private ConcurrentDictionary<string, Block> _miningJobs;
 
-        public NodeService()
+        public NodeService(ITransactionService transactionService)
         {
+            _transactionService = transactionService;
             _blockchain = new BlockingCollection<Block>();
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
-            _miningRequests = new ConcurrentDictionary<string, IList<Block>>();
+            _miningJobs = new ConcurrentDictionary<string, Block>();
         }
 
         public Block CreateBlockCandidate(
@@ -31,7 +33,6 @@ namespace Pickaxe.Blockchain.Domain
                 Difficulty = Difficulty,
                 PreviousBlockHash = _blockchain.ElementAt(_blockchain.Count - 1).Hash,
                 MinedBy = minerAddress,
-                DataHash = new byte[32],
                 Nonce = 0,
                 CreatedAtUtc = DateTime.UtcNow,
                 Hash = new byte[32]

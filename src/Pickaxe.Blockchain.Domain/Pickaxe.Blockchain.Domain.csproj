@@ -6,10 +6,12 @@
 
   <ItemGroup>
     <PackageReference Include="Nethereum.Web3" Version="2.5.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj" />
+    <ProjectReference Include="..\Pickaxe.Blockchain.Common\Pickaxe.Blockchain.Common.csproj" />
   </ItemGroup>
 
 </Project>

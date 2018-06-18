@@ -27,6 +27,7 @@ namespace Pickaxe.Blockchain.Api
             services.AddMvc();
 
             services.AddSingleton<INodeService, NodeService>();
+            services.AddSingleton<ITransactionService, TransactionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
