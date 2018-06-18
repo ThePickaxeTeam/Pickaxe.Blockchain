@@ -1,6 +1,6 @@
 ﻿namespace Pickaxe.Blockchain.Domain.Serialization
 {
-    internal class BlockData
+    public class BlockData
     {
         public int Index { get; set; }
 

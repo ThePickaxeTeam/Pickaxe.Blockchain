@@ -18,35 +18,41 @@ namespace Pickaxe.Blockchain.Domain
         public NodeService(ITransactionService transactionService)
         {
             _transactionService = transactionService;
-            _blockchain = new BlockingCollection<Block>();
+            _blockchain = new BlockingCollection<Block>()
+            {
+                Block.GenesisBlock
+            };
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _miningJobs = new ConcurrentDictionary<string, Block>();
         }
 
-        public Block CreateBlockCandidate(
-            string minerAddress,
-            decimal expectedReward)
+        public Block CreateCandidateBlock(
+            string minerAddress)
         {
             Block blockCandidate = new Block
             {
                 Index = _blockchain.Count,
                 Difficulty = Difficulty,
-                PreviousBlockHash = _blockchain.ElementAt(_blockchain.Count - 1).Hash,
+                PreviousBlockHash = _blockchain.Last().DataHash,
                 MinedBy = minerAddress,
                 Nonce = 0,
-                CreatedAtUtc = DateTime.UtcNow,
-                Hash = new byte[32]
+                CreatedAtUtc = DateTime.UtcNow
             };
 
             blockCandidate.Transactions.Add(
                 Transaction.CreateCoinbaseTransaction(
                     minerAddress,
-                    expectedReward,
                     _blockchain.Count));
+
             foreach (Transaction transaction in _pendingTransactions.Values)
             {
                 blockCandidate.Transactions.Add(transaction);
             }
+
+            _miningJobs.AddOrUpdate(
+                minerAddress, 
+                blockCandidate, 
+                (address, oldCandidate) => blockCandidate);
 
             return blockCandidate;
         }

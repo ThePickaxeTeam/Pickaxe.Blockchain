@@ -1,7 +1,5 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Signer;
-using Nethereum.Signer.Crypto;
-using Org.BouncyCastle.Math;
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Domain.Serialization;
 using System;
@@ -12,6 +10,7 @@ namespace Pickaxe.Blockchain.Domain.Models
 {
     public class Block
     {
+        private static Block _genesisBlock;
         private byte[] _dataHash;
 
         public Block()
@@ -19,37 +18,41 @@ namespace Pickaxe.Blockchain.Domain.Models
             Transactions = new List<Transaction>();
         }
 
-        public static Block CreateGenesisBlock(string to)
+        public static Block GenesisBlock
         {
-            string data = "Genesis block transaction";
-            Block genesisBlock = new Block
+            get
             {
-                Index = 0,
-                Transactions = new List<Transaction>
+                if (_genesisBlock == null)
                 {
-                    new Transaction
+                    _genesisBlock = new Block
                     {
-                        From = (new byte[20]).ToHex(),
-                        To = to,
-                        Value = 1000,
-                        Fee = 0,
+                        Index = 0,
+                        Transactions = new List<Transaction>
+                        {
+                            new Transaction
+                            {
+                                From = (new byte[20]).ToHex(),
+                                To = (new byte[20]).ToHex(),
+                                Value = 1000,
+                                Fee = 0,
+                                CreatedAtUtc = DateTime.UtcNow,
+                                Data = "Genesis block transaction",
+                                SenderPublicKey = new byte[64],
+                                SenderSignature = EthECDSASignatureFactory.FromComponents(
+                                    new byte[32],
+                                    new byte[32],
+                                    0),
+                                MinedInBlockIndex = 0,
+                                TransferSuccessful = true
+                            }
+                        },
+                        MinedBy = (new byte[20]).ToHex(),
                         CreatedAtUtc = DateTime.UtcNow,
-                        Data = data,
-                        SenderPublicKey = new byte[64],
-                        SenderSignature = EthECDSASignatureFactory.FromComponents(
-                            new byte[32],
-                            new byte[32],
-                            0),
-                        MinedInBlockIndex = 0,
-                        TransferSuccessful = true
-                    }
-                },
-                MinedBy = (new byte[20]).ToHex(),
-                CreatedAtUtc = DateTime.UtcNow,
-                PreviousBlockHash = new byte[32]
-            };
-
-            return genesisBlock;
+                        PreviousBlockHash = new byte[32]
+                    };
+                }
+                return _genesisBlock;
+            }
         }
 
         public int Index { get; set; }
@@ -79,31 +82,12 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public DateTime CreatedAtUtc { get; set; }
 
-        public byte[] Hash { get; set; }
-
         private byte[] ComputeHash()
         {
             BlockData blockData = new BlockData
             {
                 Index = Index,
-                Transactions = Transactions.Select(t => new TransactionData
-                {
-                    From = t.From,
-                    To = t.To,
-                    Value = t.Value,
-                    Fee = t.Fee,
-                    DateCreated = t.CreatedAtUtc.ToString("o"),
-                    Data = t.Data,
-                    SenderPublicKey = t.SenderPublicKey.ToHex(),
-                    DataHash = t.DataHash.ToHex(),
-                    SenderSignature = new string[]
-                    {
-                        t.SenderSignature.R.ToHex(),
-                        t.SenderSignature.S.ToHex()
-                    },
-                    MinedInBlockIndex = t.MinedInBlockIndex,
-                    TransferSuccessful = t.TransferSuccessful
-                }).ToArray(),
+                Transactions = Transactions.Select(t => new TransactionData(t)).ToArray(),
                 Difficulty = Difficulty,
                 PreviousBlockHash = PreviousBlockHash.ToHex(),
                 MinedBy = MinedBy

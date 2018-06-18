@@ -4,6 +4,6 @@ namespace Pickaxe.Blockchain.Domain
 {
     public interface INodeService
     {
-        Block CreateBlockCandidate(string minerAddress, decimal expectedReward);
+        Block CreateCandidateBlock(string minerAddress);
     }
 }

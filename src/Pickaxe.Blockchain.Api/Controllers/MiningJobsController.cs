@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Pickaxe.Blockchain.Api.Mappers;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain;
+using Pickaxe.Blockchain.Domain.Models;
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
@@ -25,13 +27,13 @@ namespace Pickaxe.Blockchain.Api.Controllers
         [HttpGet("{minerAddress}", Name = "Get")]
         public IActionResult Get(string minerAddress)
         {
-            MiningJob job = new MiningJob
+            if (string.IsNullOrWhiteSpace(minerAddress))
             {
-                BlockIndex = 1,
-                TransactionsHash = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                PreviousBlockHash = "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
-                Difficulty = 5
-            };
+                return BadRequest(new Error("Invalid miner address."));
+            }
+
+            Block candidate = _nodeService.CreateCandidateBlock(minerAddress);
+            MiningJob job = candidate.ToMiningJob();
 
             return Ok(job);
         }
