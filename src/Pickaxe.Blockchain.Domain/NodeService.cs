@@ -84,10 +84,16 @@ namespace Pickaxe.Blockchain.Domain
 
             _blockchain.Add(candidateBlock);
 
+            candidateBlock.MinerProvidedHash = miningResult.BlockHash;
             candidateBlock.DateCreated = miningResult.DateCreated;
             candidateBlock.Nonce = miningResult.Nonce;
 
             return BlockValidationResult.Ok;
+        }
+
+        public Block GetBlock(int index)
+        {
+            return _blockchain.ElementAtOrDefault(index);
         }
     }
 }

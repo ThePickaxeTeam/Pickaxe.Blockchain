@@ -5,6 +5,7 @@ using Pickaxe.Blockchain.Domain;
 using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Extensions;
 using Pickaxe.Blockchain.Domain.Models;
+using Block = Pickaxe.Blockchain.Domain.Models.Block;
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
@@ -48,12 +49,12 @@ namespace Pickaxe.Blockchain.Api.Controllers
             }
 
             return CreatedAtRoute(
-                "DefaultApi", new
+                "GetBlock", new
                 {
-                    controller = "blocks",
-                    id = candidateBlock.Index
+                    controller = "Blocks",
+                    index = candidateBlock.Index
                 },
-                candidateBlock);
+                candidateBlock.ToContract());
         }
     }
 }

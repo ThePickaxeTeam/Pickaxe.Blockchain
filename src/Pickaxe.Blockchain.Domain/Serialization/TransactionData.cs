@@ -1,13 +1,14 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
+using Pickaxe.Blockchain.Domain.Models;
 
 namespace Pickaxe.Blockchain.Domain.Serialization
 {
     public class TransactionData : TransactionDataBase
     {
-        public TransactionData(Models.Transaction transaction)
+        public TransactionData(Transaction transaction)
             : base(transaction)
         {
-            DataHash = transaction.DataHash.ToHex();
+            TransactionDataHash = transaction.DataHash.ToHex();
             SenderSignature = new string[]
             {
                 transaction.SenderSignature.R.ToHex(),
@@ -17,7 +18,7 @@ namespace Pickaxe.Blockchain.Domain.Serialization
             TransferSuccessful = transaction.TransferSuccessful;
         }
 
-        public string DataHash { get; set; }
+        public string TransactionDataHash { get; set; }
 
         public string[] SenderSignature { get; set; }
 

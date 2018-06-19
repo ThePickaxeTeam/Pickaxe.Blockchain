@@ -1,6 +1,7 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Clients;
 using Pickaxe.Blockchain.Common;
+using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Contracts;
 using System;
 using System.Diagnostics;
@@ -10,7 +11,7 @@ namespace Pickaxe.Blockchain.Miner
 {
     /// <summary>
     /// Computes block hashes of the following type:
-    /// SHA256([block_index][transactions_hash][previous_block_hash][timestamp][nonce])
+    /// SHA256([block_data_hash][timestamp][nonce])
     /// </summary>
     internal class Miner
     {
@@ -97,12 +98,12 @@ namespace Pickaxe.Blockchain.Miner
             MiningJobResult result = new MiningJobResult
             {
                 BlockDataHash = blockDataHash,
-                DateCreated = dateCreated.ToString("o"),
+                DateCreated = dateCreated.Iso8601Formatted(),
                 Nonce = nonce.ToString(),
                 BlockHash = computedHash
             };
 
-            Response<EmptyPayload> response;
+            Response<Block> response;
             int retries = 0;
             do
             {
@@ -133,7 +134,7 @@ namespace Pickaxe.Blockchain.Miner
         {
             byte[] data = ArrayUtils.Combine(
                 blockDataHash,
-                Utils.GetBytes(dateCreated.ToString("o")),
+                dateCreated.Iso8601Formatted().GetBytes(),
                 BitConverter.GetBytes(nonce));
             byte[] hash = HashUtils.ComputeSha256(data);
             return hash.ToHex();

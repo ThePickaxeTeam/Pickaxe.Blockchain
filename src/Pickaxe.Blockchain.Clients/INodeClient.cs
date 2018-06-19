@@ -7,7 +7,7 @@ namespace Pickaxe.Blockchain.Clients
     {
         Task<Response<MiningJob>> GetMiningJob(string minerAddress);
 
-        Task<Response<EmptyPayload>> SubmitMiningJob(
+        Task<Response<Block>> SubmitMiningJob(
             MiningJobResult result,
             string minerAddress);
     }

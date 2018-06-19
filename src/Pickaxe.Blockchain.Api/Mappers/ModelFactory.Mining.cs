@@ -1,6 +1,7 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain.Models;
+using Block = Pickaxe.Blockchain.Domain.Models.Block;
 using System;
 using System.Linq;
 

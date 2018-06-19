@@ -28,12 +28,12 @@ namespace Pickaxe.Blockchain.Clients
             return await SendRequest<MiningJob>(requestMessage).ConfigureAwait(false);
         }
 
-        public async Task<Response<EmptyPayload>> SubmitMiningJob(MiningJobResult result, string minerAddress)
+        public async Task<Response<Block>> SubmitMiningJob(MiningJobResult result, string minerAddress)
         {
             // Create a POST request to Node
             var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/miningjobs/{minerAddress}");
             requestMessage.Content = SerializeRequestAsJson(result);
-            return await SendRequest<EmptyPayload>(requestMessage).ConfigureAwait(false);
+            return await SendRequest<Block>(requestMessage).ConfigureAwait(false);
         }
 
         private static StringContent SerializeRequestAsJson<T>(T request)

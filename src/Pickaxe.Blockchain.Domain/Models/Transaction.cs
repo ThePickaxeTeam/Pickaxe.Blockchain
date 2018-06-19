@@ -1,6 +1,7 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Signer;
 using Pickaxe.Blockchain.Common;
+using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Serialization;
 using System;
 
@@ -68,7 +69,7 @@ namespace Pickaxe.Blockchain.Domain.Models
         private byte[] ComputeDataHash()
         {
             string json = JsonUtils.Serialize(new TransactionDataBase(this), false);
-            return HashUtils.ComputeSha256(Utils.GetBytes(json));
+            return HashUtils.ComputeSha256(json.GetBytes());
         }
     }
 }

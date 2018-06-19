@@ -2,9 +2,8 @@
 using Pickaxe.Blockchain.Api.Mappers;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain;
-using Pickaxe.Blockchain.Domain.Enums;
-using Pickaxe.Blockchain.Domain.Extensions;
-using Pickaxe.Blockchain.Domain.Models;
+using Block = Pickaxe.Blockchain.Domain.Models.Block;
+
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
@@ -17,10 +16,22 @@ namespace Pickaxe.Blockchain.Api.Controllers
         {
         }
 
-        [HttpGet("{id}", Name = "Get")]
-        public IActionResult Get(int id)
+        // GET: api/Blocks/6
+        [HttpGet("{index}", Name = "GetBlock")]
+        public IActionResult Get(int index)
         {
-            return Ok();
+            if (index < 0)
+            {
+                return BadRequest(new Error("Block index must be a non-negative integer."));
+            }
+
+            Block block = NodeService.GetBlock(index);
+            if (block == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(block.ToContract());
         }
     }
 }

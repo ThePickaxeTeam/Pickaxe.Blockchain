@@ -8,5 +8,7 @@ namespace Pickaxe.Blockchain.Domain
         Block CreateCandidateBlock(string minerAddress);
 
         BlockValidationResult TryAddBlock(MiningResult miningResult, out Block candidateBlock);
+
+        Block GetBlock(int index);
     }
 }
