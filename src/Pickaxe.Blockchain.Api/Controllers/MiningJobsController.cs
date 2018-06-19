@@ -42,6 +42,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
         [HttpPost("{minerAddress}", Name = "Post")]
         public IActionResult Post(string minerAddress, [FromBody]MiningJobResult value)
         {
+            //_nodeService.ProcessMiningResult(minerAddress);
             return Ok();
         }
     }

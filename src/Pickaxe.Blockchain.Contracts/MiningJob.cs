@@ -7,10 +7,14 @@
         /// </summary>
         public int BlockIndex { get; set; }
 
-        public string TransactionsHash { get; set; }
-
-        public string PreviousBlockHash { get; set; }
-
         public int Difficulty { get; set; }
+
+        public decimal ExpectedReward { get; set; }
+
+        public string RewardAddress { get; set; }
+
+        public int TransactionsIncluded { get; set; }
+
+        public string BlockDataHash { get; set; }
     }
 }

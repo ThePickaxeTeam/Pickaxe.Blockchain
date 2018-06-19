@@ -18,7 +18,7 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public decimal Fee { get; set; }
 
-        public DateTime CreatedAtUtc { get; set; }
+        public DateTime DateCreated { get; set; }
 
         public string Data { get; set; }
 
@@ -30,7 +30,7 @@ namespace Pickaxe.Blockchain.Domain.Models
             {
                 if (_dataHash == null)
                 {
-                    _dataHash = ComputeHash();
+                    _dataHash = ComputeDataHash();
                 }
 
                 return _dataHash;
@@ -51,18 +51,21 @@ namespace Pickaxe.Blockchain.Domain.Models
             {
                 From = (new byte[20]).ToHex(),
                 To = minerAddress,
+                Value = 5000350,
+                Fee = 0,
+                DateCreated = DateTime.UtcNow,
+                Data = "Coinbase transaction",
                 SenderPublicKey = new byte[64],
                 SenderSignature = EthECDSASignatureFactory.FromComponents(
                     new byte[32],
                     new byte[32],
                     0),
-                Data = "Coinbase transaction",
-                CreatedAtUtc = DateTime.UtcNow,
-                MinedInBlockIndex = blockIndex
+                MinedInBlockIndex = blockIndex,
+                TransferSuccessful = true
             };
         }
 
-        private byte[] ComputeHash()
+        private byte[] ComputeDataHash()
         {
             string json = JsonUtils.Serialize(new TransactionDataBase(this), false);
             return HashUtils.ComputeSha256(Utils.GetBytes(json));

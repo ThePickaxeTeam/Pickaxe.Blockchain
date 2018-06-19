@@ -35,7 +35,7 @@ namespace Pickaxe.Blockchain.Domain.Models
                                 To = (new byte[20]).ToHex(),
                                 Value = 1000,
                                 Fee = 0,
-                                CreatedAtUtc = DateTime.UtcNow,
+                                DateCreated = DateTime.UtcNow,
                                 Data = "Genesis block transaction",
                                 SenderPublicKey = new byte[64],
                                 SenderSignature = EthECDSASignatureFactory.FromComponents(
@@ -47,7 +47,7 @@ namespace Pickaxe.Blockchain.Domain.Models
                             }
                         },
                         MinedBy = (new byte[20]).ToHex(),
-                        CreatedAtUtc = DateTime.UtcNow,
+                        DateCreated = DateTime.UtcNow,
                         PreviousBlockHash = new byte[32]
                     };
                 }
@@ -71,18 +71,20 @@ namespace Pickaxe.Blockchain.Domain.Models
             {
                 if (_dataHash == null)
                 {
-                    _dataHash = ComputeHash();
+                    _dataHash = ComputeDataHash();
                 }
 
                 return _dataHash;
             }
         }
 
+        public string MinerProvidedHash { get; set; }
+
         public ulong Nonce { get; set; }
 
-        public DateTime CreatedAtUtc { get; set; }
+        public DateTime DateCreated { get; set; }
 
-        private byte[] ComputeHash()
+        private byte[] ComputeDataHash()
         {
             BlockData blockData = new BlockData
             {

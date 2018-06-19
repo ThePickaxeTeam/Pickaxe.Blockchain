@@ -45,23 +45,24 @@ namespace Pickaxe.Blockchain.Miner
                 MiningJob job = await GetMiningJob(nodeClient, minerAddress).ConfigureAwait(false);
 
                 string difficultyCheck = new string('0', job.Difficulty);
-                byte[] precomputedData = GetPrecomputedData(job);
-                long ticks = DateTime.UtcNow.Ticks;
+                byte[] blockDataHash = job.BlockDataHash.HexToByteArray();
+                DateTime dateCreated = DateTime.UtcNow;
                 ulong nonce = 0;
 
                 while (nonce < ulong.MaxValue)
                 {
-                    string guess = ComputeHash(precomputedData, ticks, nonce);
+                    string guess = ComputeHash(blockDataHash, dateCreated, nonce);
                     if (guess.StartsWith(difficultyCheck))
                     {
                         // block found, send it to the node
                         bool submitted = await SubmitMiningResult(
                             nodeClient,
-                            nonce,
-                            ticks,
-                            guess,
                             minerAddress,
-                            5).ConfigureAwait(false);
+                            5,
+                            job.BlockDataHash,
+                            dateCreated,
+                            nonce,
+                            guess).ConfigureAwait(false);
                         Console.WriteLine($"Submitting mining result {(submitted ? "successful" : "failed")}.");
                         break;
                     }
@@ -75,7 +76,7 @@ namespace Pickaxe.Blockchain.Miner
                     // get new timestamp on every 100,000 iterations
                     if (nonce % 100000 == 0)
                     {
-                        ticks = DateTime.UtcNow.Ticks;
+                        dateCreated = DateTime.UtcNow;
                     }
 
                     nonce++;
@@ -86,17 +87,19 @@ namespace Pickaxe.Blockchain.Miner
 
         private static async Task<bool> SubmitMiningResult(
             INodeClient nodeClient,
-            ulong nonce,
-            long ticks,
-            string hash,
             string minerAddress,
-            int maxRetries)
+            int maxRetries,
+            string blockDataHash,
+            DateTime dateCreated,
+            ulong nonce,
+            string computedHash)
         {
             MiningJobResult result = new MiningJobResult
             {
+                BlockDataHash = blockDataHash,
+                DateCreated = dateCreated.ToString("o"),
                 Nonce = nonce.ToString(),
-                TimestampTicks = ticks.ToString(),
-                BlockHash = hash
+                BlockHash = computedHash
             };
 
             Response<EmptyPayload> response;
@@ -123,22 +126,14 @@ namespace Pickaxe.Blockchain.Miner
             return response.Payload;
         }
 
-        private static byte[] GetPrecomputedData(MiningJob job)
-        {
-            return ArrayUtils.Combine(
-                BitConverter.GetBytes(job.BlockIndex),
-                job.TransactionsHash.HexToByteArray(),
-                job.PreviousBlockHash.HexToByteArray());
-        }
-
         private static string ComputeHash(
-            byte[] precomputedData,
-            long ticks,
+            byte[] blockDataHash,
+            DateTime dateCreated,
             ulong nonce)
         {
             byte[] data = ArrayUtils.Combine(
-                precomputedData,
-                BitConverter.GetBytes(ticks),
+                blockDataHash,
+                Utils.GetBytes(dateCreated.ToString("o")),
                 BitConverter.GetBytes(nonce));
             byte[] hash = HashUtils.ComputeSha256(data);
             return hash.ToHex();

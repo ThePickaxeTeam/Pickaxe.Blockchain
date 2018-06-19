@@ -14,20 +14,14 @@ namespace Pickaxe.Blockchain.Api.Mappers
     {
         public static MiningJob ToMiningJob(this Block candidateBlock)
         {
-            TransactionDataBase[] transactions = candidateBlock
-                .Transactions
-                .Select(t => new TransactionDataBase(t))
-                .ToArray();
-
-            string json = JsonUtils.Serialize(transactions, false);
-            byte[] hash = HashUtils.ComputeSha256(Utils.GetBytes(json));
-
             return new MiningJob
             {
                 BlockIndex = candidateBlock.Index,
-                TransactionsHash = hash.ToHex(),
-                PreviousBlockHash = candidateBlock.PreviousBlockHash.ToHex(),
-                Difficulty = candidateBlock.Difficulty
+                Difficulty = candidateBlock.Difficulty,
+                ExpectedReward = candidateBlock.Transactions.Sum(t => t.Fee),
+                RewardAddress = candidateBlock.MinedBy,
+                TransactionsIncluded = candidateBlock.Transactions.Count,
+                BlockDataHash = candidateBlock.DataHash.ToHex()
             };
         }
     }

@@ -26,8 +26,7 @@ namespace Pickaxe.Blockchain.Domain
             _miningJobs = new ConcurrentDictionary<string, Block>();
         }
 
-        public Block CreateCandidateBlock(
-            string minerAddress)
+        public Block CreateCandidateBlock(string minerAddress)
         {
             Block blockCandidate = new Block
             {
@@ -36,7 +35,7 @@ namespace Pickaxe.Blockchain.Domain
                 PreviousBlockHash = _blockchain.Last().DataHash,
                 MinedBy = minerAddress,
                 Nonce = 0,
-                CreatedAtUtc = DateTime.UtcNow
+                DateCreated = DateTime.UtcNow
             };
 
             blockCandidate.Transactions.Add(
@@ -50,11 +49,17 @@ namespace Pickaxe.Blockchain.Domain
             }
 
             _miningJobs.AddOrUpdate(
-                minerAddress, 
-                blockCandidate, 
+                minerAddress,
+                blockCandidate,
                 (address, oldCandidate) => blockCandidate);
 
             return blockCandidate;
+        }
+
+        public void A(string minerAddress)
+        {
+            Block candidateBlock;
+            bool found = _miningJobs.TryGetValue(minerAddress, out candidateBlock);
         }
     }
 }

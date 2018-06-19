@@ -2,9 +2,11 @@
 {
     public class MiningJobResult
     {
-        public string Nonce { get; set; }
+        public string BlockDataHash { get; set; }
 
-        public string TimestampTicks { get; set; }
+        public string DateCreated { get; set; }
+
+        public string Nonce { get; set; }
 
         public string BlockHash { get; set; }
     }

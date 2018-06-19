@@ -10,7 +10,7 @@ namespace Pickaxe.Blockchain.Domain.Serialization
             To = transaction.To;
             Value = transaction.Value;
             Fee = transaction.Fee;
-            DateCreated = transaction.CreatedAtUtc.ToString("o");
+            DateCreated = transaction.DateCreated.ToString("o");
             Data = transaction.Data;
             SenderPublicKey = transaction.SenderPublicKey.ToHex();
         }
