@@ -1,4 +1,6 @@
-﻿using Pickaxe.Blockchain.Domain.Models;
+﻿using Nethereum.Hex.HexConvertors.Extensions;
+using Pickaxe.Blockchain.Domain.Enums;
+using Pickaxe.Blockchain.Domain.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -56,10 +58,36 @@ namespace Pickaxe.Blockchain.Domain
             return blockCandidate;
         }
 
-        public void A(string minerAddress)
+        public BlockValidationResult TryAddBlock(MiningResult miningResult, out Block candidateBlock)
         {
-            Block candidateBlock;
-            bool found = _miningJobs.TryGetValue(minerAddress, out candidateBlock);
+            bool found = _miningJobs.TryGetValue(miningResult.MinerAddress, out candidateBlock);
+            if (!found)
+            {
+                return BlockValidationResult.MinerAddressNotFound;
+            }
+
+            if (candidateBlock.DataHash.ToHex() != miningResult.BlockDataHash)
+            {
+                return BlockValidationResult.BlockDataHashMismatch;
+            }
+
+            string difficultyCheck = new string('0', Difficulty);
+            if (!miningResult.BlockHash.StartsWith(difficultyCheck))
+            {
+                return BlockValidationResult.BlockHashDifficultyMismatch;
+            }
+
+            if (candidateBlock.Index != _blockchain.Count)
+            {
+                return BlockValidationResult.BlockAlreadyAdded;
+            }
+
+            _blockchain.Add(candidateBlock);
+
+            candidateBlock.DateCreated = miningResult.DateCreated;
+            candidateBlock.Nonce = miningResult.Nonce;
+
+            return BlockValidationResult.Ok;
         }
     }
 }

@@ -1,12 +1,8 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain.Models;
-using Pickaxe.Blockchain.Domain.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.Api.Mappers
 {
@@ -22,6 +18,20 @@ namespace Pickaxe.Blockchain.Api.Mappers
                 RewardAddress = candidateBlock.MinedBy,
                 TransactionsIncluded = candidateBlock.Transactions.Count,
                 BlockDataHash = candidateBlock.DataHash.ToHex()
+            };
+        }
+
+        public static MiningResult ToMiningResult(
+            this MiningJobResult jobResult,
+            string minerAddress)
+        {
+            return new MiningResult
+            {
+                MinerAddress = minerAddress,
+                BlockDataHash = jobResult.BlockDataHash,
+                DateCreated = DateTime.Parse(jobResult.DateCreated).ToUniversalTime(),
+                Nonce = UInt64.Parse(jobResult.Nonce),
+                BlockHash = jobResult.BlockHash
             };
         }
     }
