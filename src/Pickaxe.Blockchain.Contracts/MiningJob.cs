@@ -9,7 +9,7 @@
 
         public int Difficulty { get; set; }
 
-        public decimal ExpectedReward { get; set; }
+        public long ExpectedReward { get; set; }
 
         public string RewardAddress { get; set; }
 

@@ -1,5 +1,4 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Signer;
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Serialization;
@@ -15,15 +14,15 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public string To { get; set; }
 
-        public decimal Value { get; set; }
+        public long Value { get; set; }
 
-        public decimal Fee { get; set; }
+        public long Fee { get; set; }
 
         public DateTime DateCreated { get; set; }
 
         public string Data { get; set; }
 
-        public byte[] SenderPublicKey { get; set; }
+        public string SenderPublicKey { get; set; }
 
         public byte[] DataHash
         {
@@ -38,7 +37,7 @@ namespace Pickaxe.Blockchain.Domain.Models
             }
         }
 
-        public EthECDSASignature SenderSignature { get; set; }
+        public string[] SenderSignature { get; set; }
 
         public int MinedInBlockIndex { get; set; }
 
@@ -56,11 +55,12 @@ namespace Pickaxe.Blockchain.Domain.Models
                 Fee = 0,
                 DateCreated = DateTime.UtcNow,
                 Data = "coinbase tx",
-                SenderPublicKey = (new string('0', 65)).HexToByteArray(),
-                SenderSignature = EthECDSASignatureFactory.FromComponents(
-                    new byte[32],
-                    new byte[32],
-                    0),
+                SenderPublicKey = new string('0', 65),
+                SenderSignature = new string[]
+                {
+                    new string('0', 64),
+                    new string('0', 64)
+                },
                 MinedInBlockIndex = blockIndex,
                 TransferSuccessful = true
             };

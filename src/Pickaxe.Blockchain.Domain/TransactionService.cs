@@ -1,7 +1,5 @@
-﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Signer;
-using Pickaxe.Blockchain.Domain.Models;
-using Pickaxe.Blockchain.Domain.Serialization;
+﻿using Nethereum.Signer;
+using Pickaxe.Blockchain.Common;
 
 namespace Pickaxe.Blockchain.Domain
 {
@@ -11,8 +9,10 @@ namespace Pickaxe.Blockchain.Domain
         {
             byte[] transactionDataHash = transaction.DataHash;
 
+            EthECDSASignature signature = EncryptionUtils.GetEthECDSASignature(
+                transaction.SenderSignature);
             EthECKey publicKey = EthECKey.RecoverFromSignature(
-                transaction.SenderSignature,
+                signature,
                 transactionDataHash);
             bool valid = publicKey.GetPublicAddress() == transaction.From;
             return valid;

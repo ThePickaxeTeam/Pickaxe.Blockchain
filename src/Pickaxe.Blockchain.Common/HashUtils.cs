@@ -160,7 +160,7 @@ namespace Pickaxe.Blockchain.Common
         public static string ToHexCompressed(ECPoint point)
         {
             BigInteger yCoord = point.YCoord.ToBigInteger();
-            return point.XCoord.ToString() + Convert.ToInt32(IsOdd(yCoord));
+            return point.XCoord.ToString() + Convert.ToInt32(yCoord.IsOdd());
         }
 
         public static string ComputeBlockSha256Hash(
@@ -171,12 +171,6 @@ namespace Pickaxe.Blockchain.Common
             string data = $"{blockDataHash}|{dateCreated.Iso8601Formatted()}|{nonce}";
             byte[] hash = ComputeSha256(data.GetBytes());
             return hash.ToHex();
-        }
-
-        private static bool IsOdd(BigInteger value)
-        {
-            BigInteger remainder = value.Remainder(BigInteger.Two);
-            return remainder.CompareTo(BigInteger.One) == 0;
         }
 
         private static string CreateBitcoinAddress(PubKey publicKey, Network network = null)

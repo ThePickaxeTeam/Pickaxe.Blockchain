@@ -1,5 +1,4 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Signer;
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Serialization;
@@ -38,11 +37,12 @@ namespace Pickaxe.Blockchain.Domain.Models
                                 Fee = 0,
                                 DateCreated = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                                 Data = "genesis tx",
-                                SenderPublicKey = (new string('0', 65)).HexToByteArray(),
-                                SenderSignature = EthECDSASignatureFactory.FromComponents(
-                                    new byte[32],
-                                    new byte[32],
-                                    0),
+                                SenderPublicKey = new string('0', 65),
+                                SenderSignature = new string[]
+                                {
+                                    new string('0', 64),
+                                    new string('0', 64)
+                                },
                                 MinedInBlockIndex = 0,
                                 TransferSuccessful = true
                             }

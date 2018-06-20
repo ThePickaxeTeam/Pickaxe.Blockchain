@@ -17,12 +17,12 @@ namespace Pickaxe.Blockchain.Api.Mappers
                 Fee = transaction.Fee,
                 DateCreated = transaction.DateCreated.Iso8601Formatted(),
                 Data = transaction.Data,
-                SenderPubKey = transaction.SenderPublicKey.ToHex(),
+                SenderPubKey = transaction.SenderPublicKey,
                 TransactionDataHash = transaction.DataHash.ToHex(),
                 SenderSignature = new string[]
                 {
-                    transaction.SenderSignature.R.ToHex(),
-                    transaction.SenderSignature.S.ToHex()
+                    transaction.SenderSignature[0],
+                    transaction.SenderSignature[1]
                 },
                 MinedInBlockIndex = transaction.MinedInBlockIndex,
                 TransferSuccessful = transaction.TransferSuccessful

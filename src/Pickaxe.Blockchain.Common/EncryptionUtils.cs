@@ -15,6 +15,7 @@ using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
 using Org.BouncyCastle.Security;
+using Pickaxe.Blockchain.Common.Extensions;
 using System;
 
 namespace Pickaxe.Blockchain.Common
@@ -178,6 +179,16 @@ namespace Pickaxe.Blockchain.Common
             Array.Copy(rands, result, rands.Length);
             result[result.Length - 1] = (byte)EthECKey.GetRecIdFromV(signature.V);
             return result.ToHex(true);
+        }
+
+        public static EthECDSASignature GetEthECDSASignature(string[] hexCoords)
+        {
+            BigInteger r = new BigInteger(hexCoords[0], 16);
+            BigInteger s = new BigInteger(hexCoords[1], 16);
+            byte v = Convert.ToByte(s.IsOdd());
+
+            EthECDSASignature signature = new EthECDSASignature(r, s, new[] { v });
+            return signature;
         }
     }
 }

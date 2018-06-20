@@ -6,9 +6,9 @@
 
         public string To { get; set; }
 
-        public decimal Value { get; set; }
+        public long Value { get; set; }
 
-        public decimal Fee { get; set; }
+        public long Fee { get; set; }
 
         public string DateCreated { get; set; }
 
