@@ -43,6 +43,8 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public bool TransferSuccessful { get; set; }
 
+        public bool Confirmed { get; set; }
+
         public static Transaction CreateCoinbaseTransaction(
             string minerAddress,
             int blockIndex)

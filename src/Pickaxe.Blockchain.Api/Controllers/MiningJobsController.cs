@@ -38,10 +38,10 @@ namespace Pickaxe.Blockchain.Api.Controllers
         public IActionResult Post(string minerAddress, [FromBody]MiningJobResult value)
         {
             MiningResult miningResult = value.ToMiningResult(minerAddress);
-            Block candidateBlock;
+
             BlockValidationResult validationResult = NodeService.TryAddBlock(
                 miningResult,
-                out candidateBlock);
+                out Block candidateBlock);
 
             if (validationResult != BlockValidationResult.Ok)
             {

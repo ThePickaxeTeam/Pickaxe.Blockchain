@@ -16,6 +16,19 @@ namespace Pickaxe.Blockchain.Api.Controllers
         {
         }
 
+        // GET api/transactions/8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2
+        [HttpGet("{transactionDataHash}")]
+        public IActionResult Get(string transactionDataHash)
+        {
+            bool found = NodeService.TryGetTransaction(transactionDataHash, out Transaction transaction);
+            if (found)
+            {
+                return Ok(transaction.ToContract(transaction.Confirmed));
+            }
+
+            return NotFound();
+        }
+
         // GET api/transactions/pending
         [HttpGet("pending")]
         public IActionResult GetPending()

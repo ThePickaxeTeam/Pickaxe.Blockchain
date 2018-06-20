@@ -108,6 +108,22 @@ namespace Pickaxe.Blockchain.Domain
             return BlockValidationResult.Ok;
         }
 
+        public bool TryGetTransaction(string transactionDataHash, out Transaction transaction)
+        {
+            if (_pendingTransactions.TryGetValue(transactionDataHash, out transaction))
+            {
+                transaction.Confirmed = false;
+                return true;
+            }
+            if (_confirmedTransactions.TryGetValue(transactionDataHash, out transaction))
+            {
+                transaction.Confirmed = true;
+                return true;
+            }
+
+            return false;
+        }
+
         public IList<Transaction> GetPendingTransactions()
         {
             return _pendingTransactions.Values.ToList();
