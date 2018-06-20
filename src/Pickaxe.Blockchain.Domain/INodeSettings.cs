@@ -2,6 +2,14 @@
 {
     public interface INodeSettings
     {
-        int Difficulty { get; }
+        string About { get; }
+
+        string NodeId { get; }
+
+        string ChainId { get; }
+
+        string NodeUrl { get; }
+
+        int CurrentDifficulty { get; }
     }
 }

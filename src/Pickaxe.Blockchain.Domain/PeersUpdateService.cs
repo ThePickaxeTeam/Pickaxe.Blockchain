@@ -17,6 +17,11 @@ namespace Pickaxe.Blockchain.Domain
             _peers = new ConcurrentDictionary<string, string>();
         }
 
+        public int GetPeersCount()
+        {
+            return _peers.Count;
+        }
+
         public void UpdatePeers(Block block)
         {
             foreach (string baseUrl in _peers.Values)

@@ -6,19 +6,16 @@ namespace Pickaxe.Blockchain.Domain.Enums
     {
         Ok = 0,
 
-        [Description("Miner address not found.")]
-        MinerAddressNotFound = 1,
-
-        [Description("Block data hash mismatch.")]
-        BlockDataHashMismatch = 2,
+        [Description("Block not found or already mined.")]
+        BlockNotFound = 1,
 
         [Description("Block hash difficulty mismatch.")]
-        BlockHashDifficultyMismatch = 3,
+        BlockHashDifficultyMismatch = 2,
 
         [Description("Invalid block hash.")]
-        InvalidBlockHash = 4,
+        InvalidBlockHash = 3,
 
-        [Description("Block has already been added.")]
-        BlockAlreadyAdded = 5
+        [Description("Block has already been mined.")]
+        BlockAlreadyMined = 4
     }
 }

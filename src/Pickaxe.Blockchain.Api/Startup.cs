@@ -26,9 +26,10 @@ namespace Pickaxe.Blockchain.Api
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
 
-            services.AddSingleton<INodeService, NodeService>();
-            services.AddSingleton<INodeSettings, NodeSettings>();
+            services.AddSingleton<IPeersUpdateService, PeersUpdateService>();
             services.AddSingleton<ITransactionService, TransactionService>();
+            services.AddSingleton<INodeSettings, NodeSettings>();
+            services.AddSingleton<INodeService, NodeService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
