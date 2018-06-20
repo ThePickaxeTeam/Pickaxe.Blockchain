@@ -111,7 +111,7 @@ namespace Pickaxe.Blockchain.Domain
             {
                 About = _nodeSettings.About,
                 NodeId = _nodeSettings.NodeId,
-                ChainId = _nodeSettings.ChainId,
+                ChainId = Block.GenesisBlock.DataHash.ToHex(),
                 NodeUrl = _nodeSettings.NodeUrl,
                 Peers = _peersUpdateService.GetPeersCount(),
                 CurrentDifficulty = _nodeSettings.CurrentDifficulty,
@@ -120,6 +120,26 @@ namespace Pickaxe.Blockchain.Domain
                 ConfirmedTransactions = 0, // TODO:
                 PendingTransactions = _pendingTransactions.Count
             };
+        }
+
+        public DebugInfo GetDebugInfo()
+        {
+            return new DebugInfo
+            {
+                SelfUrl = _nodeSettings.NodeUrl,
+                Blocks = _blockchain.ToList()
+            };
+        }
+
+        public void ResetChain()
+        {
+            _blockchain.Dispose();
+            _blockchain = new BlockingCollection<Block>()
+            {
+                Block.GenesisBlock
+            };
+            _pendingTransactions.Clear();
+            _miningJobs.Clear();
         }
 
         private static void UpdateCandidateBlockData(

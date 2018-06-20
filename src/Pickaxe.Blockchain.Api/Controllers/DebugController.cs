@@ -7,19 +7,27 @@ namespace Pickaxe.Blockchain.Api.Controllers
 {
     [Produces("application/json")]
     [Route("[controller]")]
-    public class InfoController : BaseController
+    public class DebugController : BaseController
     {
-        public InfoController(INodeService nodeService)
+        public DebugController(INodeService nodeService)
             : base(nodeService)
         {
         }
 
-        // GET info
+        // GET debug
         [HttpGet]
         public IActionResult Get()
         {
-            NodeInfo info = NodeService.GetNodeInfo();
+            DebugInfo info = NodeService.GetDebugInfo();
             return Ok(info.ToContract());
+        }
+
+        // GET debug/reset-chain
+        [HttpGet("reset-chain")]
+        public IActionResult ResetChain()
+        {
+            NodeService.ResetChain();
+            return Ok();
         }
     }
 }

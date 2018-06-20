@@ -8,8 +8,6 @@ namespace Pickaxe.Blockchain.Domain
 
         public string NodeId { get; private set; } = Guid.NewGuid().ToString();
 
-        public string ChainId { get; private set; } = Guid.NewGuid().ToString();
-
         public string NodeUrl { get; private set; } = "http://localhost:64149/";
 
         public int CurrentDifficulty { get; private set; } = 4;

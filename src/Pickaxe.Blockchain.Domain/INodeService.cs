@@ -12,5 +12,9 @@ namespace Pickaxe.Blockchain.Domain
         Block GetBlock(int index);
 
         NodeInfo GetNodeInfo();
+
+        DebugInfo GetDebugInfo();
+
+        void ResetChain();
     }
 }
