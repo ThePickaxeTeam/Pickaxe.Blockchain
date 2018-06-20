@@ -4,6 +4,7 @@ using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Models;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Pickaxe.Blockchain.Domain
@@ -16,6 +17,7 @@ namespace Pickaxe.Blockchain.Domain
 
         private BlockingCollection<Block> _blockchain;
         private ConcurrentDictionary<string, Transaction> _pendingTransactions;
+        private ConcurrentDictionary<string, Transaction> _confirmedTransactions;
         private ConcurrentDictionary<string, Block> _miningJobs;
 
         public NodeService(
@@ -30,6 +32,9 @@ namespace Pickaxe.Blockchain.Domain
             {
                 Block.GenesisBlock
             };
+            _confirmedTransactions = new ConcurrentDictionary<string, Transaction>();
+            AddFaucetTransactionAsConfirmed();
+
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _miningJobs = new ConcurrentDictionary<string, Block>();
         }
@@ -41,18 +46,19 @@ namespace Pickaxe.Blockchain.Domain
                 Index = _blockchain.Count,
                 Difficulty = _nodeSettings.CurrentDifficulty,
                 PreviousBlockHash = _blockchain.Last().DataHash,
-                MinedBy = minerAddress,
-                Nonce = 0,
-                DateCreated = DateTime.UtcNow
+                MinedBy = minerAddress
             };
 
+            int blockIndex = _blockchain.Count;
             blockCandidate.Transactions.Add(
                 Transaction.CreateCoinbaseTransaction(
                     minerAddress,
-                    _blockchain.Count));
+                    blockIndex));
 
             foreach (Transaction transaction in _pendingTransactions.Values)
             {
+                transaction.MinedInBlockIndex = blockIndex;
+                transaction.TransferSuccessful = true;
                 blockCandidate.Transactions.Add(transaction);
             }
 
@@ -93,11 +99,28 @@ namespace Pickaxe.Blockchain.Domain
             }
 
             // block found, will be added in chain
-            _miningJobs.Clear();
             _blockchain.Add(candidateBlock);
+            _miningJobs.Clear();
+
             UpdateCandidateBlockData(candidateBlock, miningResult);
+            UpdateTransactionsData(candidateBlock);
 
             return BlockValidationResult.Ok;
+        }
+
+        public IList<Transaction> GetPendingTransactions()
+        {
+            return _pendingTransactions.Values.ToList();
+        }
+
+        public IList<Transaction> GetConfirmedTransactions()
+        {
+            return _confirmedTransactions.Values.ToList();
+        }
+
+        public IList<Block> GetAllBlocks()
+        {
+            return _blockchain.ToList();
         }
 
         public Block GetBlock(int index)
@@ -138,8 +161,26 @@ namespace Pickaxe.Blockchain.Domain
             {
                 Block.GenesisBlock
             };
+            _confirmedTransactions.Clear();
+            AddFaucetTransactionAsConfirmed();
+
             _pendingTransactions.Clear();
             _miningJobs.Clear();
+        }
+
+        private void UpdateTransactionsData(Block candidateBlock)
+        {
+            foreach (Transaction transaction in candidateBlock.Transactions)
+            {
+                _confirmedTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
+                _pendingTransactions.TryRemove(transaction.DataHash.ToHex(), out _);
+            }
+        }
+
+        private void AddFaucetTransactionAsConfirmed()
+        {
+            Transaction faucetTransaction = Block.GenesisBlock.Transactions[0];
+            _confirmedTransactions.TryAdd(faucetTransaction.DataHash.ToHex(), faucetTransaction);
         }
 
         private static void UpdateCandidateBlockData(

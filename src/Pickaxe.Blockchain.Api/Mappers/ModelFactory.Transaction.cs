@@ -7,9 +7,11 @@ namespace Pickaxe.Blockchain.Api.Mappers
 {
     public static partial class ModelFactory
     {
-        public static TransactionContract ToContract(this Transaction transaction)
+        public static TransactionContract ToContract(
+            this Transaction transaction,
+            bool confirmed = true)
         {
-            return new TransactionContract
+            var contract = new TransactionContract
             {
                 From = transaction.From,
                 To = transaction.To,
@@ -23,10 +25,16 @@ namespace Pickaxe.Blockchain.Api.Mappers
                 {
                     transaction.SenderSignature[0],
                     transaction.SenderSignature[1]
-                },
-                MinedInBlockIndex = transaction.MinedInBlockIndex,
-                TransferSuccessful = transaction.TransferSuccessful
+                }
             };
+
+            if (confirmed)
+            {
+                contract.MinedInBlockIndex = transaction.MinedInBlockIndex;
+                contract.TransferSuccessful = transaction.TransferSuccessful;
+            }
+
+            return contract;
         }
     }
 }

@@ -2,6 +2,8 @@
 using Pickaxe.Blockchain.Api.Mappers;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain;
+using System.Collections.Generic;
+using System.Linq;
 using Block = Pickaxe.Blockchain.Domain.Models.Block;
 
 
@@ -14,6 +16,14 @@ namespace Pickaxe.Blockchain.Api.Controllers
         public BlocksController(INodeService nodeService)
             : base(nodeService)
         {
+        }
+
+        // GET
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            IList<Block> blocks = NodeService.GetAllBlocks();
+            return Ok(blocks.Select(b => b.ToContract()).ToList());
         }
 
         // GET: api/Blocks/6
