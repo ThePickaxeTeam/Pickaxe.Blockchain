@@ -1,4 +1,5 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
+using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Models;
 using System;
@@ -9,16 +10,18 @@ namespace Pickaxe.Blockchain.Domain
 {
     public class NodeService : INodeService
     {
-        private const int Difficulty = 4;
-
+        private INodeSettings _nodeSettings;
         private ITransactionService _transactionService;
 
         private BlockingCollection<Block> _blockchain;
         private ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private ConcurrentDictionary<string, Block> _miningJobs;
 
-        public NodeService(ITransactionService transactionService)
+        public NodeService(
+            INodeSettings nodeSettings,
+            ITransactionService transactionService)
         {
+            _nodeSettings = nodeSettings;
             _transactionService = transactionService;
             _blockchain = new BlockingCollection<Block>()
             {
@@ -33,7 +36,7 @@ namespace Pickaxe.Blockchain.Domain
             Block blockCandidate = new Block
             {
                 Index = _blockchain.Count,
-                Difficulty = Difficulty,
+                Difficulty = _nodeSettings.Difficulty,
                 PreviousBlockHash = _blockchain.Last().DataHash,
                 MinedBy = minerAddress,
                 Nonce = 0,
@@ -71,10 +74,19 @@ namespace Pickaxe.Blockchain.Domain
                 return BlockValidationResult.BlockDataHashMismatch;
             }
 
-            string difficultyCheck = new string('0', Difficulty);
+            string difficultyCheck = new string('0', _nodeSettings.Difficulty);
             if (!miningResult.BlockHash.StartsWith(difficultyCheck))
             {
                 return BlockValidationResult.BlockHashDifficultyMismatch;
+            }
+
+            string blockHashCheck = HashUtils.ComputeBlockSha256Hash(
+                miningResult.BlockDataHash,
+                miningResult.DateCreated,
+                miningResult.Nonce);
+            if (blockHashCheck != miningResult.BlockHash)
+            {
+                return BlockValidationResult.InvalidBlockHash;
             }
 
             if (candidateBlock.Index != _blockchain.Count)

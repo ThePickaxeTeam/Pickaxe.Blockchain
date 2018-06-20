@@ -1,5 +1,4 @@
-﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Pickaxe.Blockchain.Clients;
+﻿using Pickaxe.Blockchain.Clients;
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Contracts;
@@ -27,7 +26,7 @@ namespace Pickaxe.Blockchain.Miner
             if (args.Length < 2)
             {
                 nodeBaseUrl = "http://localhost:64149";
-                minerAddress = "687422eEA2cB73B5d3e242bA5456b782919AFc85";
+                minerAddress = "9a9f082f37270ff54c5ca4204a0e4da6951fe917";
             }
             else
             {
@@ -46,13 +45,12 @@ namespace Pickaxe.Blockchain.Miner
                 MiningJob job = await GetMiningJob(nodeClient, minerAddress).ConfigureAwait(false);
 
                 string difficultyCheck = new string('0', job.Difficulty);
-                byte[] blockDataHash = job.BlockDataHash.HexToByteArray();
                 DateTime dateCreated = DateTime.UtcNow;
                 ulong nonce = 0;
 
                 while (nonce < ulong.MaxValue)
                 {
-                    string guess = ComputeHash(blockDataHash, dateCreated, nonce);
+                    string guess = HashUtils.ComputeBlockSha256Hash(job.BlockDataHash, dateCreated, nonce);
                     if (guess.StartsWith(difficultyCheck))
                     {
                         // block found, send it to the node
@@ -125,19 +123,6 @@ namespace Pickaxe.Blockchain.Miner
             } while (response.Status == Status.Failed);
 
             return response.Payload;
-        }
-
-        private static string ComputeHash(
-            byte[] blockDataHash,
-            DateTime dateCreated,
-            ulong nonce)
-        {
-            byte[] data = ArrayUtils.Combine(
-                blockDataHash,
-                dateCreated.Iso8601Formatted().GetBytes(),
-                BitConverter.GetBytes(nonce));
-            byte[] hash = HashUtils.ComputeSha256(data);
-            return hash.ToHex();
         }
     }
 }

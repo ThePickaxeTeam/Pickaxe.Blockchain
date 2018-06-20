@@ -27,6 +27,7 @@ namespace Pickaxe.Blockchain.Api
                 });
 
             services.AddSingleton<INodeService, NodeService>();
+            services.AddSingleton<INodeSettings, NodeSettings>();
             services.AddSingleton<ITransactionService, TransactionService>();
         }
 

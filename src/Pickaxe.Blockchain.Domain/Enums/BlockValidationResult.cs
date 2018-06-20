@@ -15,7 +15,10 @@ namespace Pickaxe.Blockchain.Domain.Enums
         [Description("Block hash difficulty mismatch.")]
         BlockHashDifficultyMismatch = 3,
 
+        [Description("Invalid block hash.")]
+        InvalidBlockHash = 4,
+
         [Description("Block has already been added.")]
-        BlockAlreadyAdded = 4
+        BlockAlreadyAdded = 5
     }
 }

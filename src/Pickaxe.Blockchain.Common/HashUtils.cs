@@ -7,6 +7,7 @@ using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
+using Pickaxe.Blockchain.Common.Extensions;
 using System;
 using System.Text;
 
@@ -160,6 +161,16 @@ namespace Pickaxe.Blockchain.Common
         {
             BigInteger yCoord = point.YCoord.ToBigInteger();
             return point.XCoord.ToString() + Convert.ToInt32(IsOdd(yCoord));
+        }
+
+        public static string ComputeBlockSha256Hash(
+            string blockDataHash,
+            DateTime dateCreated,
+            ulong nonce)
+        {
+            string data = $"{blockDataHash}|{dateCreated.Iso8601Formatted()}|{nonce}";
+            byte[] hash = ComputeSha256(data.GetBytes());
+            return hash.ToHex();
         }
 
         private static bool IsOdd(BigInteger value)

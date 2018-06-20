@@ -55,8 +55,8 @@ namespace Pickaxe.Blockchain.Domain.Models
                 Value = 5000350,
                 Fee = 0,
                 DateCreated = DateTime.UtcNow,
-                Data = "Coinbase transaction",
-                SenderPublicKey = new byte[64],
+                Data = "coinbase tx",
+                SenderPublicKey = (new string('0', 65)).HexToByteArray(),
                 SenderSignature = EthECDSASignatureFactory.FromComponents(
                     new byte[32],
                     new byte[32],
