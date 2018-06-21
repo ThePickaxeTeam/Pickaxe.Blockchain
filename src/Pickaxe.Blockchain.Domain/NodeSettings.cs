@@ -11,5 +11,7 @@ namespace Pickaxe.Blockchain.Domain
         public string NodeUrl { get; private set; } = "http://localhost:64149/";
 
         public int CurrentDifficulty { get; private set; } = 4;
+
+        public long MinFee { get; private set; } = 10;
     }
 }

@@ -108,6 +108,36 @@ namespace Pickaxe.Blockchain.Domain
             return BlockValidationResult.Ok;
         }
 
+        public CreateTransactionResult TryCreateTransaction(Transaction transaction)
+        {
+            bool validSignature = _transactionService.ValidateSignature(transaction);
+            if (!validSignature)
+            {
+                return CreateTransactionResult.InvalidSignature;
+            }
+
+            bool transactionExists = CheckTransactionExists(transaction.DataHash.ToHex());
+            if (transactionExists)
+            {
+                return CreateTransactionResult.DuplicateTransaction;
+            }
+
+            long senderBalance = GetAccountBalance(transaction.From);
+            if (senderBalance < transaction.Value + transaction.Fee)
+            {
+                return CreateTransactionResult.InsufficientBalance;
+            }
+
+            if (transaction.Fee < _nodeSettings.MinFee)
+            {
+                return CreateTransactionResult.InsufficientFee;
+            }
+
+            _pendingTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
+
+            return CreateTransactionResult.Ok;
+        }
+
         public bool TryGetTransaction(string transactionDataHash, out Transaction transaction)
         {
             if (_pendingTransactions.TryGetValue(transactionDataHash, out transaction))
@@ -222,6 +252,35 @@ namespace Pickaxe.Blockchain.Domain
         {
             Transaction faucetTransaction = Block.GenesisBlock.Transactions[0];
             _confirmedTransactions.TryAdd(faucetTransaction.DataHash.ToHex(), faucetTransaction);
+        }
+
+        private bool CheckTransactionExists(string transactionDataHash)
+        {
+            if (_pendingTransactions.ContainsKey(transactionDataHash) ||
+                _confirmedTransactions.ContainsKey(transactionDataHash))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private long GetAccountBalance(string address)
+        {
+            long total = 0;
+            foreach (Transaction transaction in _confirmedTransactions.Values)
+            {
+                if (transaction.From == address)
+                {
+                    total -= transaction.Value;
+                }
+                if (transaction.To == address)
+                {
+                    total += transaction.Value;
+                }
+            }
+
+            return total;
         }
 
         private static void UpdateCandidateBlockData(

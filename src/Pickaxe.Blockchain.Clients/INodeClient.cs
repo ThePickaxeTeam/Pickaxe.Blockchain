@@ -10,5 +10,7 @@ namespace Pickaxe.Blockchain.Clients
         Task<Response<Block>> SubmitMiningJob(
             MiningJobResult result,
             string minerAddress);
+
+        Task<Response<Transaction>> CreateTransaction(CreateTransactionRequest request);
     }
 }

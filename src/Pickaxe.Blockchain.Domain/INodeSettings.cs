@@ -9,5 +9,7 @@
         string NodeUrl { get; }
 
         int CurrentDifficulty { get; }
+
+        long MinFee { get; }
     }
 }

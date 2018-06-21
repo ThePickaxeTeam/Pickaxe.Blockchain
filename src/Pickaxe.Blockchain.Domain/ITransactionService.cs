@@ -1,7 +1,9 @@
-﻿namespace Pickaxe.Blockchain.Domain
+﻿using Transaction = Pickaxe.Blockchain.Domain.Models.Transaction;
+
+namespace Pickaxe.Blockchain.Domain
 {
     public interface ITransactionService
     {
-        bool Verify(Models.Transaction transaction);
+        bool ValidateSignature(Transaction transaction);
     }
 }

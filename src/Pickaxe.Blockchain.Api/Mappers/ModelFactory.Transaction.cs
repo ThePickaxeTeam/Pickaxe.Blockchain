@@ -1,6 +1,8 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Common.Extensions;
-using Pickaxe.Blockchain.Domain.Models;
+using Pickaxe.Blockchain.Contracts;
+using System;
+using Transaction = Pickaxe.Blockchain.Domain.Models.Transaction;
 using TransactionContract = Pickaxe.Blockchain.Contracts.Transaction;
 
 namespace Pickaxe.Blockchain.Api.Mappers
@@ -35,6 +37,25 @@ namespace Pickaxe.Blockchain.Api.Mappers
             }
 
             return contract;
+        }
+
+        public static Transaction ToDomainModel(this CreateTransactionRequest request)
+        {
+            return new Transaction
+            {
+                From = request.From,
+                To = request.To,
+                Value = request.Value,
+                Fee = request.Fee,
+                DateCreated = DateTime.Parse(request.DateCreated).ToUniversalTime(),
+                Data = request.Data,
+                SenderPublicKey= request.SenderPubKey,
+                SenderSignature = new string[]
+                {
+                    request.SenderSignature[0],
+                    request.SenderSignature[1]
+                }
+            };
         }
     }
 }

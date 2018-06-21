@@ -1,11 +1,13 @@
 ﻿using Nethereum.Signer;
 using Pickaxe.Blockchain.Common;
+using Transaction = Pickaxe.Blockchain.Domain.Models.Transaction;
+
 
 namespace Pickaxe.Blockchain.Domain
 {
     public class TransactionService : ITransactionService
     {
-        public bool Verify(Models.Transaction transaction)
+        public bool ValidateSignature(Transaction transaction)
         {
             byte[] transactionDataHash = transaction.DataHash;
 

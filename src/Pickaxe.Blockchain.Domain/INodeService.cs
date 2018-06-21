@@ -10,6 +10,8 @@ namespace Pickaxe.Blockchain.Domain
 
         BlockValidationResult TryAddBlock(MiningResult miningResult, out Block candidateBlock);
 
+        CreateTransactionResult TryCreateTransaction(Transaction transaction);
+
         bool TryGetTransaction(string transactionDataHash, out Transaction transaction);
 
         Dictionary<string, long> GetAllBalances();
