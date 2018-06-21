@@ -8,7 +8,6 @@ using System.Linq;
 namespace Pickaxe.Blockchain.Api.Controllers
 {
     [Produces("application/json")]
-    [Route("api/[controller]")]
     public class TransactionsController : BaseController
     {
         public TransactionsController(INodeService nodeService)
@@ -16,8 +15,17 @@ namespace Pickaxe.Blockchain.Api.Controllers
         {
         }
 
+        // GET api/address/f3a1e69b6176052fcc4a3248f1c5a91dea308ca9/transactions
+        [HttpGet("api/address/{address}/[controller]")]
+        public IActionResult GetTransactions(string address)
+        {
+            IEnumerable<Transaction> transactions = NodeService.GetTransactions(address);
+
+            return Ok(transactions.Select(t => t.ToContract(t.Confirmed)).ToList());
+        }
+
         // GET api/transactions/8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2
-        [HttpGet("{transactionDataHash}")]
+        [HttpGet("api/[controller]/{transactionDataHash}")]
         public IActionResult Get(string transactionDataHash)
         {
             bool found = NodeService.TryGetTransaction(transactionDataHash, out Transaction transaction);
@@ -30,7 +38,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
         }
 
         // GET api/transactions/pending
-        [HttpGet("pending")]
+        [HttpGet("api/[controller]/pending")]
         public IActionResult GetPending()
         {
             IList<Transaction> transactions = NodeService.GetPendingTransactions();
@@ -39,7 +47,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
         }
 
         // GET api/transactions/confirmed
-        [HttpGet("confirmed")]
+        [HttpGet("api/[controller]/confirmed")]
         public IActionResult GetConfirmed()
         {
             IList<Transaction> transactions = NodeService.GetConfirmedTransactions();

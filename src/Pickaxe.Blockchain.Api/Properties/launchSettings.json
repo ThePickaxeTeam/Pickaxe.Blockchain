@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "info",
+      "launchUrl": "api/info",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -19,7 +19,7 @@
     "Pickaxe.Blockchain.Api": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "info",
+      "launchUrl": "api/info",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

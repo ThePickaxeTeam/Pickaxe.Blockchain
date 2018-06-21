@@ -6,7 +6,7 @@ using Pickaxe.Blockchain.Domain.Models;
 namespace Pickaxe.Blockchain.Api.Controllers
 {
     [Produces("application/json")]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class InfoController : BaseController
     {
         public InfoController(INodeService nodeService)

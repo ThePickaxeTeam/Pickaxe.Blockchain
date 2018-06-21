@@ -12,6 +12,10 @@ namespace Pickaxe.Blockchain.Domain
 
         bool TryGetTransaction(string transactionDataHash, out Transaction transaction);
 
+        Dictionary<string, long> GetAllBalances();
+
+        IEnumerable<Transaction> GetTransactions(string address);
+
         IList<Transaction> GetPendingTransactions();
 
         IList<Transaction> GetConfirmedTransactions();

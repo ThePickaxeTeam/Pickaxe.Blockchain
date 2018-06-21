@@ -18,7 +18,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
         {
         }
 
-        // GET: api/MiningJobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
+        // GET: api/miningjobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
         [HttpGet("{minerAddress}", Name = "Get")]
         public IActionResult Get(string minerAddress)
         {
@@ -33,7 +33,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
             return Ok(job);
         }
 
-        // POST: api/MiningJobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
+        // POST: api/miningjobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
         [HttpPost("{minerAddress}", Name = "Post")]
         public IActionResult Post(string minerAddress, [FromBody]MiningJobResult value)
         {

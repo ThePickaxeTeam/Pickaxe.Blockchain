@@ -26,7 +26,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
             return Ok(blocks.Select(b => b.ToContract()).ToList());
         }
 
-        // GET: api/Blocks/6
+        // GET: api/blocks/6
         [HttpGet("{index}", Name = "GetBlock")]
         public IActionResult Get(int index)
         {

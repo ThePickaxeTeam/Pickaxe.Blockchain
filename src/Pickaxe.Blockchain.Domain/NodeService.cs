@@ -124,6 +124,31 @@ namespace Pickaxe.Blockchain.Domain
             return false;
         }
 
+        public Dictionary<string, long> GetAllBalances()
+        {
+            Dictionary<string, long> balances = new Dictionary<string, long>();
+            foreach (Transaction transaction in _confirmedTransactions.Values)
+            {
+                AddKeysIfMissing(balances, transaction.From, transaction.To);
+                balances[transaction.From] -= transaction.Value;
+                balances[transaction.To] += transaction.Value;
+            }
+
+            return balances;
+        }
+
+        public IEnumerable<Transaction> GetTransactions(string address)
+        {
+            List<Transaction> matchingPendingTransactions =
+                GetMatchingTransactions(_pendingTransactions.Values, address, false);
+            List<Transaction> matchingConfirmedTransactions =
+                GetMatchingTransactions(_confirmedTransactions.Values, address, true);
+            IEnumerable<Transaction> result =
+                matchingPendingTransactions.Concat(matchingConfirmedTransactions);
+
+            return result;
+        }
+
         public IList<Transaction> GetPendingTransactions()
         {
             return _pendingTransactions.Values.ToList();
@@ -206,6 +231,38 @@ namespace Pickaxe.Blockchain.Domain
             candidateBlock.MinerProvidedHash = miningResult.BlockHash;
             candidateBlock.DateCreated = miningResult.DateCreated;
             candidateBlock.Nonce = miningResult.Nonce;
+        }
+
+        private static void AddKeysIfMissing(
+            Dictionary<string, long> dictionary,
+            params string[] keys)
+        {
+            foreach (string key in keys)
+            {
+                if (!dictionary.ContainsKey(key))
+                {
+                    dictionary.Add(key, 0);
+                }
+            }
+        }
+
+        private static List<Transaction> GetMatchingTransactions(
+            IEnumerable<Transaction> transactions,
+            string address,
+            bool confirmed)
+        {
+            List<Transaction> matchingTransactions = new List<Transaction>();
+            foreach (Transaction transaction in transactions)
+            {
+                if (transaction.From == address ||
+                    transaction.To == address)
+                {
+                    transaction.Confirmed = confirmed;
+                    matchingTransactions.Add(transaction);
+                }
+            }
+
+            return matchingTransactions;
         }
     }
 }
