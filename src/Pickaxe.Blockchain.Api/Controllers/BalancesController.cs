@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Pickaxe.Blockchain.Domain;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
@@ -17,7 +17,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            Dictionary<string, long> balances = NodeService.GetAllBalances();
+            ReadOnlyDictionary<string, long> balances = NodeService.GetAllBalances();
             return Ok(balances);
         }
     }

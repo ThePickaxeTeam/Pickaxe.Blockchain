@@ -2,9 +2,9 @@
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Models;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Pickaxe.Blockchain.Domain
@@ -18,6 +18,7 @@ namespace Pickaxe.Blockchain.Domain
         private BlockingCollection<Block> _blockchain;
         private ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private ConcurrentDictionary<string, Transaction> _confirmedTransactions;
+        private ConcurrentDictionary<string, long> _accountBalances;
         private ConcurrentDictionary<string, Block> _miningJobs;
 
         public NodeService(
@@ -33,7 +34,8 @@ namespace Pickaxe.Blockchain.Domain
                 Block.GenesisBlock
             };
             _confirmedTransactions = new ConcurrentDictionary<string, Transaction>();
-            AddFaucetTransactionAsConfirmed();
+            _accountBalances = new ConcurrentDictionary<string, long>();
+            AddFaucetTransactionsAsConfirmed();
 
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _miningJobs = new ConcurrentDictionary<string, Block>();
@@ -103,7 +105,7 @@ namespace Pickaxe.Blockchain.Domain
             _miningJobs.Clear();
 
             UpdateCandidateBlockData(candidateBlock, miningResult);
-            UpdateTransactionsData(candidateBlock);
+            MoveBlockTransactionsToConfirmed(candidateBlock);
 
             return BlockValidationResult.Ok;
         }
@@ -154,17 +156,9 @@ namespace Pickaxe.Blockchain.Domain
             return false;
         }
 
-        public Dictionary<string, long> GetAllBalances()
+        public ReadOnlyDictionary<string, long> GetAllBalances()
         {
-            Dictionary<string, long> balances = new Dictionary<string, long>();
-            foreach (Transaction transaction in _confirmedTransactions.Values)
-            {
-                AddKeysIfMissing(balances, transaction.From, transaction.To);
-                balances[transaction.From] -= transaction.Value;
-                balances[transaction.To] += transaction.Value;
-            }
-
-            return balances;
+            return new ReadOnlyDictionary<string, long>(_accountBalances);
         }
 
         public IEnumerable<Transaction> GetTransactions(string address)
@@ -211,7 +205,7 @@ namespace Pickaxe.Blockchain.Domain
                 CurrentDifficulty = _nodeSettings.CurrentDifficulty,
                 BlocksCount = _blockchain.Count,
                 CumulativeDifficulty = _blockchain.Sum(b => b.Difficulty),
-                ConfirmedTransactions = 0, // TODO:
+                ConfirmedTransactions = _confirmedTransactions.Count,
                 PendingTransactions = _pendingTransactions.Count
             };
         }
@@ -233,25 +227,50 @@ namespace Pickaxe.Blockchain.Domain
                 Block.GenesisBlock
             };
             _confirmedTransactions.Clear();
-            AddFaucetTransactionAsConfirmed();
+            _accountBalances.Clear();
+            AddFaucetTransactionsAsConfirmed();
 
             _pendingTransactions.Clear();
             _miningJobs.Clear();
         }
 
-        private void UpdateTransactionsData(Block candidateBlock)
+        private void MoveBlockTransactionsToConfirmed(Block candidateBlock)
         {
             foreach (Transaction transaction in candidateBlock.Transactions)
             {
                 _confirmedTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
                 _pendingTransactions.TryRemove(transaction.DataHash.ToHex(), out _);
             }
+            UpdateAccountBalances(candidateBlock.Transactions);
         }
 
-        private void AddFaucetTransactionAsConfirmed()
+        private void AddFaucetTransactionsAsConfirmed()
         {
-            Transaction faucetTransaction = Block.GenesisBlock.Transactions[0];
-            _confirmedTransactions.TryAdd(faucetTransaction.DataHash.ToHex(), faucetTransaction);
+            foreach (Transaction faucetTransaction in Block.GenesisBlock.Transactions)
+            {
+                _confirmedTransactions.TryAdd(
+                    faucetTransaction.DataHash.ToHex(),
+                    faucetTransaction);
+            }
+            UpdateAccountBalances(Block.GenesisBlock.Transactions);
+        }
+
+        private void UpdateAccountBalances(IEnumerable<Transaction> transactions)
+        {
+            foreach (Transaction transaction in transactions)
+            {
+                if (!_accountBalances.ContainsKey(transaction.From))
+                {
+                    _accountBalances.TryAdd(transaction.From, 0);
+                }
+                _accountBalances[transaction.From] -= transaction.Value;
+
+                if (!_accountBalances.ContainsKey(transaction.To))
+                {
+                    _accountBalances.TryAdd(transaction.To, 0);
+                }
+                _accountBalances[transaction.To] += transaction.Value;
+            }
         }
 
         private bool CheckTransactionExists(string transactionDataHash)
@@ -267,20 +286,12 @@ namespace Pickaxe.Blockchain.Domain
 
         private long GetAccountBalance(string address)
         {
-            long total = 0;
-            foreach (Transaction transaction in _confirmedTransactions.Values)
+            if (_accountBalances.ContainsKey(address))
             {
-                if (transaction.From == address)
-                {
-                    total -= transaction.Value;
-                }
-                if (transaction.To == address)
-                {
-                    total += transaction.Value;
-                }
+                return _accountBalances[address];
             }
 
-            return total;
+            return 0;
         }
 
         private static void UpdateCandidateBlockData(
@@ -290,19 +301,6 @@ namespace Pickaxe.Blockchain.Domain
             candidateBlock.MinerProvidedHash = miningResult.BlockHash;
             candidateBlock.DateCreated = miningResult.DateCreated;
             candidateBlock.Nonce = miningResult.Nonce;
-        }
-
-        private static void AddKeysIfMissing(
-            Dictionary<string, long> dictionary,
-            params string[] keys)
-        {
-            foreach (string key in keys)
-            {
-                if (!dictionary.ContainsKey(key))
-                {
-                    dictionary.Add(key, 0);
-                }
-            }
         }
 
         private static List<Transaction> GetMatchingTransactions(
