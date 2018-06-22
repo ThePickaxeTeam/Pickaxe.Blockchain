@@ -157,12 +157,6 @@ namespace Pickaxe.Blockchain.Common
             return buffer;
         }
 
-        public static string ToHexCompressed(ECPoint point)
-        {
-            BigInteger yCoord = point.YCoord.ToBigInteger();
-            return point.XCoord.ToString() + Convert.ToInt32(yCoord.IsOdd());
-        }
-
         public static string ComputeBlockSha256Hash(
             string blockDataHash,
             DateTime dateCreated,

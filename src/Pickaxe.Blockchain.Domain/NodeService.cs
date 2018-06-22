@@ -110,10 +110,10 @@ namespace Pickaxe.Blockchain.Domain
 
         public CreateTransactionResult TryCreateTransaction(Transaction transaction)
         {
-            bool validSignature = _transactionService.ValidateSignature(transaction);
-            if (!validSignature)
+            bool signatureVerified = _transactionService.VerifySignature(transaction);
+            if (!signatureVerified)
             {
-                return CreateTransactionResult.InvalidSignature;
+                return CreateTransactionResult.VerificationFailed;
             }
 
             bool transactionExists = CheckTransactionExists(transaction.DataHash.ToHex());

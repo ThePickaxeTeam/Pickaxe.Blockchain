@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Pickaxe.Blockchain.Contracts.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace Pickaxe.Blockchain.Contracts
 {
@@ -26,5 +27,19 @@ namespace Pickaxe.Blockchain.Contracts
 
         [Required]
         public string[] SenderSignature { get; set; }
+
+        public static CreateTransactionRequest FromTransactionData(TransactionData transaction)
+        {
+            return new CreateTransactionRequest
+            {
+                From = transaction.From,
+                To = transaction.To,
+                Value = transaction.Value,
+                Fee = transaction.Fee,
+                DateCreated = transaction.DateCreated,
+                Data = transaction.Data,
+                SenderPubKey = transaction.SenderPubKey
+            };
+        }
     }
 }

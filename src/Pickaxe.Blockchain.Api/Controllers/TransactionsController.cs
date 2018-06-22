@@ -37,7 +37,7 @@ namespace Pickaxe.Blockchain.Api.Controllers
             {
                 transactionDataHash = newTransaction.DataHash.ToHex()
             },
-            newTransaction.ToContract());
+            newTransaction.ToContract(false));
         }
 
         // GET api/address/f3a1e69b6176052fcc4a3248f1c5a91dea308ca9/transactions

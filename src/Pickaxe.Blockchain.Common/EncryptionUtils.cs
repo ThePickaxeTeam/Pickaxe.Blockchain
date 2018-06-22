@@ -1,7 +1,6 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.KeyStore.Crypto;
 using Nethereum.Signer;
-using Nethereum.Signer.Crypto;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto;
@@ -143,6 +142,26 @@ namespace Pickaxe.Blockchain.Common
             return q.Normalize();
         }
 
+        public static string ToHexCompressed(ECPoint point)
+        {
+            BigInteger yCoord = point.YCoord.ToBigInteger();
+            return point.XCoord.ToString() + Convert.ToInt32(yCoord.IsOdd());
+        }
+
+        public static ECPoint DecompressKey(string compressedKey)
+        {
+            string x = compressedKey.Substring(0, 64);
+            BigInteger xCoord = new BigInteger(x, 16);
+            int yOdd = int.Parse(compressedKey.Substring(64));
+            bool yBit = Convert.ToBoolean(yOdd);
+
+            var curve = Secp256k1.Curve;
+            var encoded = X9IntegerConverter.IntegerToBytes(
+                xCoord, 1 + X9IntegerConverter.GetByteLength(curve));
+            encoded[0] = (byte)(yBit ? 0x03 : 0x02);
+            return curve.DecodePoint(encoded);
+        }
+
         public static ECPublicKeyParameters GetPublicKeyParameters(string privateKey)
         {
             BigInteger d = new BigInteger(privateKey, 16);
@@ -151,25 +170,27 @@ namespace Pickaxe.Blockchain.Common
             return new ECPublicKeyParameters(q, Secp256k1DomainParameters);
         }
 
-        public static ECDSASignature Sign(byte[] data, BigInteger privateKey)
+        public static BigInteger[] Sign(byte[] data, BigInteger privateKey)
         {
             ECPrivateKeyParameters parameters =
                 new ECPrivateKeyParameters(privateKey, Secp256k1DomainParameters);
             IDsaKCalculator kCalculator = new HMacDsaKCalculator(new Sha256Digest());
             IDsa signer = new ECDsaSigner(kCalculator);
             signer.Init(true, parameters);
-            return new ECDSASignature(signer.GenerateSignature(data));
+            return signer.GenerateSignature(data);
         }
 
         public static bool VerifySignature(
-            byte[] hash,
-            ECDSASignature signature,
-            ECPublicKeyParameters parameters)
+            ECPoint publicKey,
+            BigInteger r,
+            BigInteger s,
+            byte[] hash)
         {
+            ECPublicKeyParameters parameters = GetPublicKeyParameters(publicKey);
             IDsaKCalculator kCalculator = new HMacDsaKCalculator(new Sha256Digest());
             var signer = new ECDsaSigner(kCalculator);
             signer.Init(false, parameters);
-            return signer.VerifySignature(hash, signature.R, signature.S);
+            return signer.VerifySignature(hash, r, s);
         }
 
         public static string ToString(EthECDSASignature signature)
@@ -181,14 +202,9 @@ namespace Pickaxe.Blockchain.Common
             return result.ToHex(true);
         }
 
-        public static EthECDSASignature GetEthECDSASignature(string[] hexCoords)
+        private static ECPublicKeyParameters GetPublicKeyParameters(ECPoint publicKey)
         {
-            BigInteger r = new BigInteger(hexCoords[0], 16);
-            BigInteger s = new BigInteger(hexCoords[1], 16);
-            byte v = Convert.ToByte(s.IsOdd());
-
-            EthECDSASignature signature = new EthECDSASignature(r, s, new[] { v });
-            return signature;
+            return new ECPublicKeyParameters(publicKey, Secp256k1DomainParameters);
         }
     }
 }

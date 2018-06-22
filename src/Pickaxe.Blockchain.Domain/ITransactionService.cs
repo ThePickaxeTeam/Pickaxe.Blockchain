@@ -4,6 +4,6 @@ namespace Pickaxe.Blockchain.Domain
 {
     public interface ITransactionService
     {
-        bool ValidateSignature(Transaction transaction);
+        bool VerifySignature(Transaction transaction);
     }
 }

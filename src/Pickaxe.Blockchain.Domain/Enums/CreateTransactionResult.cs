@@ -5,8 +5,8 @@ namespace Pickaxe.Blockchain.Domain.Enums
     public enum CreateTransactionResult
     {
         Ok = 0,
-        [Description("Invalid signature.")]
-        InvalidSignature = 1,
+        [Description("Signature verification failed.")]
+        VerificationFailed = 1,
         [Description("Duplicate transaction.")]
         DuplicateTransaction = 2,
         [Description("Insufficient balance.")]

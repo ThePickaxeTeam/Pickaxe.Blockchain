@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Api", "P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Domain", "Pickaxe.Blockchain.Domain\Pickaxe.Blockchain.Domain.csproj", "{759BFC92-5E86-48C7-A8F2-E81B67C75D4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pickaxe.Blockchain.Miner", "Pickaxe.Blockchain.Miner\Pickaxe.Blockchain.Miner.csproj", "{654F8BD0-8EF0-4D3B-A879-2DEB8B9AAF9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Miner", "Pickaxe.Blockchain.Miner\Pickaxe.Blockchain.Miner.csproj", "{654F8BD0-8EF0-4D3B-A879-2DEB8B9AAF9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pickaxe.Blockchain.Contracts", "Pickaxe.Blockchain.Contracts\Pickaxe.Blockchain.Contracts.csproj", "{E8A9CDE5-B73D-45BE-B7C0-1B6A2BC0BDE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Contracts", "Pickaxe.Blockchain.Contracts\Pickaxe.Blockchain.Contracts.csproj", "{E8A9CDE5-B73D-45BE-B7C0-1B6A2BC0BDE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pickaxe.Blockchain.Clients", "Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj", "{6810411B-6EB9-4A39-841F-6667F2B432B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Clients", "Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj", "{6810411B-6EB9-4A39-841F-6667F2B432B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pickaxe.Blockchain.TransactionSigner", "Pickaxe.Blockchain.TransactionSigner\Pickaxe.Blockchain.TransactionSigner.csproj", "{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{6810411B-6EB9-4A39-841F-6667F2B432B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6810411B-6EB9-4A39-841F-6667F2B432B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6810411B-6EB9-4A39-841F-6667F2B432B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

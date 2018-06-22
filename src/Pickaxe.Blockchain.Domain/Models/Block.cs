@@ -31,11 +31,11 @@ namespace Pickaxe.Blockchain.Domain.Models
                         {
                             new Transaction
                             {
-                                From = (new byte[20]).ToHex(),
-                                To = "f3a1e69b6176052fcc4a3248f1c5a91dea308ca9",
+                                From = new string('0', 40),
+                                To = "c3293572dbe6ebc60de4a20ed0e21446cae66b17",
                                 Value = 1000000000000,
                                 Fee = 0,
-                                DateCreated = new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                                DateCreated = DateTime.UtcNow,
                                 Data = "genesis tx",
                                 SenderPublicKey = new string('0', 65),
                                 SenderSignature = new string[]
@@ -49,10 +49,10 @@ namespace Pickaxe.Blockchain.Domain.Models
                         },
                         Difficulty = 0,
                         PreviousBlockHash = null,
-                        MinedBy = (new byte[20]).ToHex(),
+                        MinedBy = new string('0', 40),
                         Nonce = 0,
                         DateCreated = DateTime.UtcNow,
-                        MinerProvidedHash = "c6da93eb4249cb5ff4f9da36e2a7f8d0d61999221ed6910180948153e71cc47f"
+                        MinerProvidedHash = new string('0', 64)
                     };
                 }
                 return _genesisBlock;

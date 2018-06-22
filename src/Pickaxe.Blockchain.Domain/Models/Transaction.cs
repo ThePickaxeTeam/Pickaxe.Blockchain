@@ -51,7 +51,7 @@ namespace Pickaxe.Blockchain.Domain.Models
         {
             return new Transaction
             {
-                From = (new byte[20]).ToHex(),
+                From = new string('0', 40),
                 To = minerAddress,
                 Value = 5000350,
                 Fee = 0,
