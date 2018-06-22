@@ -11,5 +11,7 @@
         int CurrentDifficulty { get; }
 
         long MinFee { get; }
+
+        int SafeBalanceConfirmations { get; }
     }
 }

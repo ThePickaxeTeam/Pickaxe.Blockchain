@@ -1,7 +1,6 @@
 ﻿using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Models;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace Pickaxe.Blockchain.Domain
 {
@@ -15,7 +14,9 @@ namespace Pickaxe.Blockchain.Domain
 
         bool TryGetTransaction(string transactionDataHash, out Transaction transaction);
 
-        ReadOnlyDictionary<string, long> GetAllBalances();
+        Dictionary<string, long> GetAllBalances();
+
+        bool TryGetAccountBalances(string address, out AccountBalances balances);
 
         IEnumerable<Transaction> GetTransactions(string address);
 

@@ -4,7 +4,6 @@ using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Models;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Pickaxe.Blockchain.Domain
@@ -18,7 +17,7 @@ namespace Pickaxe.Blockchain.Domain
         private BlockingCollection<Block> _blockchain;
         private ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private ConcurrentDictionary<string, Transaction> _confirmedTransactions;
-        private ConcurrentDictionary<string, long> _accountBalances;
+        private ConcurrentDictionary<string, AccountBalances> _accountBalances;
         private ConcurrentDictionary<string, Block> _miningJobs;
 
         public NodeService(
@@ -29,13 +28,11 @@ namespace Pickaxe.Blockchain.Domain
             _nodeSettings = nodeSettings;
             _transactionService = transactionService;
             _peersUpdateService = peersUpdateService;
-            _blockchain = new BlockingCollection<Block>()
-            {
-                Block.GenesisBlock
-            };
+            Block genesisBlock = Block.CreateGenesisBlock();
+            _blockchain = new BlockingCollection<Block>() { genesisBlock };
             _confirmedTransactions = new ConcurrentDictionary<string, Transaction>();
-            _accountBalances = new ConcurrentDictionary<string, long>();
-            AddFaucetTransactionsAsConfirmed();
+            _accountBalances = new ConcurrentDictionary<string, AccountBalances>();
+            AddGenesisTransactionsAsConfirmed(genesisBlock.Transactions);
 
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _miningJobs = new ConcurrentDictionary<string, Block>();
@@ -136,6 +133,7 @@ namespace Pickaxe.Blockchain.Domain
             }
 
             _pendingTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
+            UpdatePendingAccountBalances(transaction);
 
             return CreateTransactionResult.Ok;
         }
@@ -156,9 +154,25 @@ namespace Pickaxe.Blockchain.Domain
             return false;
         }
 
-        public ReadOnlyDictionary<string, long> GetAllBalances()
+        public Dictionary<string, long> GetAllBalances()
         {
-            return new ReadOnlyDictionary<string, long>(_accountBalances);
+            return _accountBalances.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ConfirmedBalance);
+        }
+
+        public bool TryGetAccountBalances(string address, out AccountBalances balances)
+        {
+            if (_accountBalances.ContainsKey(address))
+            {
+                balances = _accountBalances[address];
+                return true;
+            }
+            else
+            {
+                balances = null;
+                return false;
+            }
         }
 
         public IEnumerable<Transaction> GetTransactions(string address)
@@ -199,7 +213,7 @@ namespace Pickaxe.Blockchain.Domain
             {
                 About = _nodeSettings.About,
                 NodeId = _nodeSettings.NodeId,
-                ChainId = Block.GenesisBlock.DataHash.ToHex(),
+                ChainId = _blockchain.ElementAt(0).DataHash.ToHex(),
                 NodeUrl = _nodeSettings.NodeUrl,
                 Peers = _peersUpdateService.GetPeersCount(),
                 CurrentDifficulty = _nodeSettings.CurrentDifficulty,
@@ -222,13 +236,11 @@ namespace Pickaxe.Blockchain.Domain
         public void ResetChain()
         {
             _blockchain.Dispose();
-            _blockchain = new BlockingCollection<Block>()
-            {
-                Block.GenesisBlock
-            };
+            Block genesisBlock = Block.CreateGenesisBlock();
+            _blockchain = new BlockingCollection<Block>() { genesisBlock };
             _confirmedTransactions.Clear();
             _accountBalances.Clear();
-            AddFaucetTransactionsAsConfirmed();
+            AddGenesisTransactionsAsConfirmed(genesisBlock.Transactions);
 
             _pendingTransactions.Clear();
             _miningJobs.Clear();
@@ -236,40 +248,92 @@ namespace Pickaxe.Blockchain.Domain
 
         private void MoveBlockTransactionsToConfirmed(Block candidateBlock)
         {
+            foreach (Transaction confirmedTransaction in _confirmedTransactions.Values)
+            {
+                confirmedTransaction.Confirmations++;
+            }
+
             foreach (Transaction transaction in candidateBlock.Transactions)
             {
+                transaction.Confirmations = 1;
+
                 _confirmedTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
                 _pendingTransactions.TryRemove(transaction.DataHash.ToHex(), out _);
             }
-            UpdateAccountBalances(candidateBlock.Transactions);
+
+            UpdateSafeAccountBalances();
+            UpdateConfirmedAccountBalances(candidateBlock.Transactions);
+            RevertPendingAccountBalances(candidateBlock.Transactions);
         }
 
-        private void AddFaucetTransactionsAsConfirmed()
-        {
-            foreach (Transaction faucetTransaction in Block.GenesisBlock.Transactions)
-            {
-                _confirmedTransactions.TryAdd(
-                    faucetTransaction.DataHash.ToHex(),
-                    faucetTransaction);
-            }
-            UpdateAccountBalances(Block.GenesisBlock.Transactions);
-        }
-
-        private void UpdateAccountBalances(IEnumerable<Transaction> transactions)
+        private void AddGenesisTransactionsAsConfirmed(IEnumerable<Transaction> transactions)
         {
             foreach (Transaction transaction in transactions)
             {
-                if (!_accountBalances.ContainsKey(transaction.From))
-                {
-                    _accountBalances.TryAdd(transaction.From, 0);
-                }
-                _accountBalances[transaction.From] -= transaction.Value;
+                transaction.Confirmations = 1;
 
-                if (!_accountBalances.ContainsKey(transaction.To))
+                _confirmedTransactions.TryAdd(
+                    transaction.DataHash.ToHex(),
+                    transaction);
+            }
+            UpdateConfirmedAccountBalances(transactions);
+        }
+
+        private void UpdateSafeAccountBalances()
+        {
+            foreach (Transaction transaction in _confirmedTransactions.Values)
+            {
+                AddAccountBalancesIfMissing(transaction);
+
+                if (transaction.Confirmations >= _nodeSettings.SafeBalanceConfirmations &&
+                    !transaction.IncludedInSafeBalance)
                 {
-                    _accountBalances.TryAdd(transaction.To, 0);
+                    _accountBalances[transaction.From].SafeBalance -= transaction.Value;
+                    _accountBalances[transaction.To].SafeBalance += transaction.Value;
+                    transaction.IncludedInSafeBalance = true;
                 }
-                _accountBalances[transaction.To] += transaction.Value;
+            }
+        }
+
+        private void UpdateConfirmedAccountBalances(IEnumerable<Transaction> transactions)
+        {
+            foreach (Transaction transaction in transactions)
+            {
+                AddAccountBalancesIfMissing(transaction);
+
+                _accountBalances[transaction.From].ConfirmedBalance -= transaction.Value;
+                _accountBalances[transaction.To].ConfirmedBalance += transaction.Value;
+            }
+        }
+
+        private void UpdatePendingAccountBalances(Transaction transaction)
+        {
+            AddAccountBalancesIfMissing(transaction);
+
+            _accountBalances[transaction.From].PendingBalance -= transaction.Value;
+            _accountBalances[transaction.To].PendingBalance += transaction.Value;
+        }
+
+        private void RevertPendingAccountBalances(IEnumerable<Transaction> transactions)
+        {
+            foreach (Transaction transaction in transactions)
+            {
+                AddAccountBalancesIfMissing(transaction);
+
+                _accountBalances[transaction.From].PendingBalance += transaction.Value;
+                _accountBalances[transaction.To].PendingBalance -= transaction.Value;
+            }
+        }
+
+        private void AddAccountBalancesIfMissing(Transaction transaction)
+        {
+            if (!_accountBalances.ContainsKey(transaction.From))
+            {
+                _accountBalances.TryAdd(transaction.From, new AccountBalances());
+            }
+            if (!_accountBalances.ContainsKey(transaction.To))
+            {
+                _accountBalances.TryAdd(transaction.To, new AccountBalances());
             }
         }
 
@@ -288,7 +352,7 @@ namespace Pickaxe.Blockchain.Domain
         {
             if (_accountBalances.ContainsKey(address))
             {
-                return _accountBalances[address];
+                return _accountBalances[address].ConfirmedBalance;
             }
 
             return 0;

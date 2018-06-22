@@ -13,5 +13,7 @@ namespace Pickaxe.Blockchain.Domain
         public int CurrentDifficulty { get; private set; } = 4;
 
         public long MinFee { get; private set; } = 10;
+
+        public int SafeBalanceConfirmations { get; private set; } = 6;
     }
 }

@@ -45,6 +45,10 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public bool Confirmed { get; set; }
 
+        public int Confirmations { get; set; }
+
+        public bool IncludedInSafeBalance { get; set; }
+
         public static Transaction CreateCoinbaseTransaction(
             string minerAddress,
             int blockIndex)

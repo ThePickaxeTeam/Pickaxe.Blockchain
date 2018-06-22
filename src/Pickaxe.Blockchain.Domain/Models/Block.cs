@@ -10,7 +10,6 @@ namespace Pickaxe.Blockchain.Domain.Models
 {
     public class Block
     {
-        private static Block _genesisBlock;
         private byte[] _dataHash;
 
         public Block()
@@ -18,45 +17,40 @@ namespace Pickaxe.Blockchain.Domain.Models
             Transactions = new List<Transaction>();
         }
 
-        public static Block GenesisBlock
+        public static Block CreateGenesisBlock()
         {
-            get
+            Block genesisBlock = new Block
             {
-                if (_genesisBlock == null)
+                Index = 0,
+                Transactions = new List<Transaction>
                 {
-                    _genesisBlock = new Block
+                    new Transaction
                     {
-                        Index = 0,
-                        Transactions = new List<Transaction>
-                        {
-                            new Transaction
-                            {
-                                From = new string('0', 40),
-                                To = "c3293572dbe6ebc60de4a20ed0e21446cae66b17",
-                                Value = 1000000000000,
-                                Fee = 0,
-                                DateCreated = DateTime.UtcNow,
-                                Data = "genesis tx",
-                                SenderPublicKey = new string('0', 65),
-                                SenderSignature = new string[]
-                                {
-                                    new string('0', 64),
-                                    new string('0', 64)
-                                },
-                                MinedInBlockIndex = 0,
-                                TransferSuccessful = true
-                            }
-                        },
-                        Difficulty = 0,
-                        PreviousBlockHash = null,
-                        MinedBy = new string('0', 40),
-                        Nonce = 0,
+                        From = new string('0', 40),
+                        To = "c3293572dbe6ebc60de4a20ed0e21446cae66b17",
+                        Value = 1000000000000,
+                        Fee = 0,
                         DateCreated = DateTime.UtcNow,
-                        MinerProvidedHash = new string('0', 64)
-                    };
-                }
-                return _genesisBlock;
-            }
+                        Data = "genesis tx",
+                        SenderPublicKey = new string('0', 65),
+                        SenderSignature = new string[]
+                        {
+                            new string('0', 64),
+                            new string('0', 64)
+                        },
+                        MinedInBlockIndex = 0,
+                        TransferSuccessful = true
+                    }
+                },
+                Difficulty = 0,
+                PreviousBlockHash = null,
+                MinedBy = new string('0', 40),
+                Nonce = 0,
+                DateCreated = DateTime.UtcNow,
+                MinerProvidedHash = new string('0', 64)
+            };
+
+            return genesisBlock;
         }
 
         public int Index { get; set; }
