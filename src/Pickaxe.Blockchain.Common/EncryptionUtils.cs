@@ -145,7 +145,7 @@ namespace Pickaxe.Blockchain.Common
         public static string ToHexCompressed(ECPoint point)
         {
             BigInteger yCoord = point.YCoord.ToBigInteger();
-            return point.XCoord.ToString() + Convert.ToInt32(yCoord.IsOdd());
+            return point.XCoord.ToString() + Convert.ToInt32(yCoord.TestBit(0));
         }
 
         public static ECPoint DecompressKey(string compressedKey)
