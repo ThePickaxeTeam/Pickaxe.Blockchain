@@ -44,7 +44,7 @@ namespace Pickaxe.Blockchain.Domain
             {
                 Index = _blockchain.Count,
                 Difficulty = _nodeSettings.CurrentDifficulty,
-                PreviousBlockHash = _blockchain.Last().DataHash,
+                PreviousBlockHash = _blockchain.Last().MinerProvidedHash,
                 MinedBy = minerAddress
             };
 
@@ -288,7 +288,8 @@ namespace Pickaxe.Blockchain.Domain
                 if (transaction.Confirmations >= _nodeSettings.SafeBalanceConfirmations &&
                     !transaction.IncludedInSafeBalance)
                 {
-                    _accountBalances[transaction.From].SafeBalance -= transaction.Value;
+                    _accountBalances[transaction.From].SafeBalance -=
+                        (transaction.Value + transaction.Fee);
                     _accountBalances[transaction.To].SafeBalance += transaction.Value;
                     transaction.IncludedInSafeBalance = true;
                 }
@@ -301,7 +302,8 @@ namespace Pickaxe.Blockchain.Domain
             {
                 AddAccountBalancesIfMissing(transaction);
 
-                _accountBalances[transaction.From].ConfirmedBalance -= transaction.Value;
+                _accountBalances[transaction.From].ConfirmedBalance -=
+                    (transaction.Value + transaction.Fee);
                 _accountBalances[transaction.To].ConfirmedBalance += transaction.Value;
             }
         }
@@ -310,7 +312,8 @@ namespace Pickaxe.Blockchain.Domain
         {
             AddAccountBalancesIfMissing(transaction);
 
-            _accountBalances[transaction.From].PendingBalance -= transaction.Value;
+            _accountBalances[transaction.From].PendingBalance -=
+                (transaction.Value + transaction.Fee);
             _accountBalances[transaction.To].PendingBalance += transaction.Value;
         }
 
@@ -320,7 +323,8 @@ namespace Pickaxe.Blockchain.Domain
             {
                 AddAccountBalancesIfMissing(transaction);
 
-                _accountBalances[transaction.From].PendingBalance += transaction.Value;
+                _accountBalances[transaction.From].PendingBalance +=
+                    (transaction.Value + transaction.Fee);
                 _accountBalances[transaction.To].PendingBalance -= transaction.Value;
             }
         }

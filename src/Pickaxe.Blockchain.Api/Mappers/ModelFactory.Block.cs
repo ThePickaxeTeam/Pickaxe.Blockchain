@@ -15,7 +15,7 @@ namespace Pickaxe.Blockchain.Api.Mappers
                 Index = block.Index,
                 Transactions = block.Transactions.Select(t => t.ToContract()).ToList(),
                 Difficulty = block.Difficulty,
-                PreviousBlockHash = block.IsGenesis ? null : block.PreviousBlockHash.ToHex(),
+                PreviousBlockHash = block.IsGenesis ? null : block.PreviousBlockHash,
                 MinedBy = block.MinedBy,
                 BlockDataHash = block.DataHash.ToHex(),
                 Nonce = block.Nonce,

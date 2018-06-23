@@ -1,5 +1,4 @@
-﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Pickaxe.Blockchain.Common;
+﻿using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Serialization;
 using System;
@@ -52,7 +51,7 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public int Difficulty { get; set; }
 
-        public byte[] PreviousBlockHash { get; set; }
+        public string PreviousBlockHash { get; set; }
 
         public string MinedBy { get; set; }
 
@@ -82,7 +81,7 @@ namespace Pickaxe.Blockchain.Domain.Models
                 Index = Index,
                 Transactions = Transactions.Select(t => new TransactionData(t)).ToArray(),
                 Difficulty = Difficulty,
-                PreviousBlockHash = IsGenesis ? null : PreviousBlockHash.ToHex(),
+                PreviousBlockHash = IsGenesis ? null : PreviousBlockHash,
                 MinedBy = MinedBy
             };
             string json = JsonUtils.Serialize(blockData, false);
