@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Pickaxe.Blockchain.Api.Validation;
 using Pickaxe.Blockchain.Domain;
 
 namespace Pickaxe.Blockchain.Api
@@ -20,7 +21,10 @@ namespace Pickaxe.Blockchain.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddMvc()
+                .AddMvc(options =>
+                {
+                    options.Filters.Add(typeof(ValidateModelStateAttribute));
+                })
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
