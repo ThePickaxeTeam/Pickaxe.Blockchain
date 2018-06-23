@@ -24,23 +24,8 @@ namespace Pickaxe.Blockchain.Domain.Models
                 Index = 0,
                 Transactions = new List<Transaction>
                 {
-                    new Transaction
-                    {
-                        From = new string('0', 40),
-                        To = "c3293572dbe6ebc60de4a20ed0e21446cae66b17",
-                        Value = 1000000000000,
-                        Fee = 0,
-                        DateCreated = DateTime.UtcNow,
-                        Data = "genesis tx",
-                        SenderPublicKey = new string('0', 65),
-                        SenderSignature = new string[]
-                        {
-                            new string('0', 64),
-                            new string('0', 64)
-                        },
-                        MinedInBlockIndex = 0,
-                        TransferSuccessful = true
-                    }
+                    Transaction.CreateGenesisTransaction(
+                        "c3293572dbe6ebc60de4a20ed0e21446cae66b17")
                 },
                 Difficulty = 0,
                 PreviousBlockHash = null,

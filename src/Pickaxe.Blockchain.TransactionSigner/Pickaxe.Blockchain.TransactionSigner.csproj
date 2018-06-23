@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj" />
     <ProjectReference Include="..\Pickaxe.Blockchain.Common\Pickaxe.Blockchain.Common.csproj" />
     <ProjectReference Include="..\Pickaxe.Blockchain.Contracts\Pickaxe.Blockchain.Contracts.csproj" />
   </ItemGroup>

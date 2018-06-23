@@ -1,11 +1,13 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
+using Pickaxe.Blockchain.Clients;
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Contracts.Serialization;
 using System;
+using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.TransactionSigner
 {
@@ -13,6 +15,14 @@ namespace Pickaxe.Blockchain.TransactionSigner
     {
         private static void Main(string[] args)
         {
+            MainAsync(args).GetAwaiter().GetResult();
+        }
+
+        private static async Task MainAsync(string[] args)
+        {
+            string nodeBaseUrl = "http://localhost:64149";
+            INodeClient nodeClient = new NodeClient(nodeBaseUrl);
+
             CreateTransactionRequest request = CreateAndSignTransaction(
                 "7e4670ae70c98d24f3662c172dc510a085578b9ccc717e6c2f4e547edd960a34",
                 "f51362b7351ef62253a227a77751ad9b2302f911",
@@ -20,6 +30,11 @@ namespace Pickaxe.Blockchain.TransactionSigner
                 25000,
                 10,
                 "funds");
+
+            Response<Transaction> resposne =
+                await nodeClient.CreateTransaction(request).ConfigureAwait(false);
+            Console.WriteLine(resposne.Status);
+
             VerifyTransaction(request);
         }
 

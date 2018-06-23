@@ -49,6 +49,27 @@ namespace Pickaxe.Blockchain.Domain.Models
 
         public bool IncludedInSafeBalance { get; set; }
 
+        public static Transaction CreateGenesisTransaction(string faucetAddress)
+        {
+            return new Transaction
+            {
+                From = new string('0', 40),
+                To = faucetAddress,
+                Value = 1000000000000,
+                Fee = 0,
+                DateCreated = DateTime.UtcNow,
+                Data = "genesis tx",
+                SenderPublicKey = new string('0', 65),
+                SenderSignature = new string[]
+                {
+                    new string('0', 64),
+                    new string('0', 64)
+                },
+                MinedInBlockIndex = 0,
+                TransferSuccessful = true
+            };
+        }
+
         public static Transaction CreateCoinbaseTransaction(
             string minerAddress,
             int blockIndex)
