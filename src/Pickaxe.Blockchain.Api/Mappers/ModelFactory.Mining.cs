@@ -1,11 +1,10 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Contracts;
-using Pickaxe.Blockchain.Domain.Models;
 using System;
 using System.Linq;
 using Block = Pickaxe.Blockchain.Domain.Models.Block;
-using MinedBlockContract = Pickaxe.Blockchain.Contracts.MinedBlock;
 using MinedBlock = Pickaxe.Blockchain.Domain.Models.MinedBlock;
+using MinedBlockContract = Pickaxe.Blockchain.Contracts.MinedBlock;
 
 namespace Pickaxe.Blockchain.Api.Mappers
 {
@@ -25,16 +24,16 @@ namespace Pickaxe.Blockchain.Api.Mappers
         }
 
         public static MinedBlock ToDomainModel(
-            this MinedBlockContract jobResult,
+            this MinedBlockContract block,
             string minerAddress)
         {
             return new MinedBlock
             {
                 MinerAddress = minerAddress,
-                BlockDataHash = jobResult.BlockDataHash,
-                DateCreated = DateTime.Parse(jobResult.DateCreated).ToUniversalTime(),
-                Nonce = ulong.Parse(jobResult.Nonce),
-                BlockHash = jobResult.BlockHash
+                BlockDataHash = block.BlockDataHash,
+                DateCreated = DateTime.Parse(block.DateCreated).ToUniversalTime(),
+                Nonce = ulong.Parse(block.Nonce),
+                BlockHash = block.BlockHash
             };
         }
     }

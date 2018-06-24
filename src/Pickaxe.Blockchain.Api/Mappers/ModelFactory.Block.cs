@@ -1,7 +1,6 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Models;
-using System;
 using System.Linq;
 using BlockContract = Pickaxe.Blockchain.Contracts.Block;
 
@@ -22,18 +21,6 @@ namespace Pickaxe.Blockchain.Api.Mappers
                 Nonce = block.Nonce,
                 DateCreated = block.DateCreated.Iso8601Formatted(),
                 BlockHash = block.MinerProvidedHash
-            };
-        }
-
-        public static MinedBlock ToMiningResult(this BlockContract block)
-        {
-            return new MinedBlock
-            {
-                MinerAddress = block.MinedBy,
-                BlockDataHash = block.BlockDataHash,
-                DateCreated = DateTime.Parse(block.DateCreated).ToUniversalTime(),
-                Nonce = block.Nonce,
-                BlockHash = block.BlockHash
             };
         }
     }
