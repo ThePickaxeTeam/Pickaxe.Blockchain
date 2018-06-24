@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Contract
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.Clients", "Pickaxe.Blockchain.Clients\Pickaxe.Blockchain.Clients.csproj", "{6810411B-6EB9-4A39-841F-6667F2B432B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pickaxe.Blockchain.TransactionSigner", "Pickaxe.Blockchain.TransactionSigner\Pickaxe.Blockchain.TransactionSigner.csproj", "{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pickaxe.Blockchain.TransactionSigner", "Pickaxe.Blockchain.TransactionSigner\Pickaxe.Blockchain.TransactionSigner.csproj", "{4EE107C7-6CD6-464E-8C84-7B6C32B4CBE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

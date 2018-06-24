@@ -30,7 +30,7 @@ namespace Pickaxe.Blockchain.Api
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
 
-            services.AddSingleton<IPeersUpdateService, PeersUpdateService>();
+            services.AddSingleton<IPeerSynchronizationService, PeerSynchronizationService>();
             services.AddSingleton<ITransactionService, TransactionService>();
             services.AddSingleton<INodeSettings, NodeSettings>();
             services.AddSingleton<INodeService, NodeService>();

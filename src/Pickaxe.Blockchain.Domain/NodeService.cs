@@ -1,7 +1,9 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Domain.Enums;
+using Pickaxe.Blockchain.Domain.Mappers;
 using Pickaxe.Blockchain.Domain.Models;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,9 @@ namespace Pickaxe.Blockchain.Domain
     {
         private INodeSettings _nodeSettings;
         private ITransactionService _transactionService;
-        private IPeersUpdateService _peersUpdateService;
+        private IPeerSynchronizationService _peerSynchronizationService;
 
-        private BlockingCollection<Block> _blockchain;
+        private BlockingCollection<Block> _chain;
         private ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private ConcurrentDictionary<string, Transaction> _confirmedTransactions;
         private ConcurrentDictionary<string, AccountBalances> _accountBalances;
@@ -23,13 +25,13 @@ namespace Pickaxe.Blockchain.Domain
         public NodeService(
             INodeSettings nodeSettings,
             ITransactionService transactionService,
-            IPeersUpdateService peersUpdateService)
+            IPeerSynchronizationService peerSynchronizationService)
         {
             _nodeSettings = nodeSettings;
             _transactionService = transactionService;
-            _peersUpdateService = peersUpdateService;
+            _peerSynchronizationService = peerSynchronizationService;
             Block genesisBlock = Block.CreateGenesisBlock();
-            _blockchain = new BlockingCollection<Block>() { genesisBlock };
+            _chain = new BlockingCollection<Block>() { genesisBlock };
             _confirmedTransactions = new ConcurrentDictionary<string, Transaction>();
             _accountBalances = new ConcurrentDictionary<string, AccountBalances>();
             AddGenesisTransactionsAsConfirmed(genesisBlock.Transactions);
@@ -42,13 +44,13 @@ namespace Pickaxe.Blockchain.Domain
         {
             Block blockCandidate = new Block
             {
-                Index = _blockchain.Count,
+                Index = _chain.Count,
                 Difficulty = _nodeSettings.CurrentDifficulty,
-                PreviousBlockHash = _blockchain.Last().MinerProvidedHash,
+                PreviousBlockHash = _chain.Last().MinerProvidedHash,
                 MinedBy = minerAddress
             };
 
-            int blockIndex = _blockchain.Count;
+            int blockIndex = _chain.Count;
             blockCandidate.Transactions.Add(
                 Transaction.CreateCoinbaseTransaction(
                     minerAddress,
@@ -69,40 +71,45 @@ namespace Pickaxe.Blockchain.Domain
             return blockCandidate;
         }
 
-        public BlockValidationResult TryAddBlock(MiningResult miningResult, out Block candidateBlock)
+        public BlockValidationResult TryAddBlock(MinedBlock minedBlock, out Block candidateBlock)
         {
-            bool found = _miningJobs.TryGetValue(miningResult.BlockDataHash, out candidateBlock);
+            bool found = _miningJobs.TryGetValue(minedBlock.BlockDataHash, out candidateBlock);
             if (!found)
             {
                 return BlockValidationResult.BlockNotFound;
             }
 
             string difficultyCheck = new string('0', _nodeSettings.CurrentDifficulty);
-            if (!miningResult.BlockHash.StartsWith(difficultyCheck))
+            if (!minedBlock.BlockHash.StartsWith(difficultyCheck))
             {
                 return BlockValidationResult.BlockHashDifficultyMismatch;
             }
 
             string blockHashCheck = HashUtils.ComputeBlockSha256Hash(
-                miningResult.BlockDataHash,
-                miningResult.DateCreated,
-                miningResult.Nonce);
-            if (blockHashCheck != miningResult.BlockHash)
+                minedBlock.BlockDataHash,
+                minedBlock.DateCreated,
+                minedBlock.Nonce);
+            if (blockHashCheck != minedBlock.BlockHash)
             {
                 return BlockValidationResult.InvalidBlockHash;
             }
 
-            if (candidateBlock.Index != _blockchain.Count)
+            if (candidateBlock.Index != _chain.Count)
             {
                 return BlockValidationResult.BlockAlreadyMined;
             }
 
             // block found, will be added in chain
-            _blockchain.Add(candidateBlock);
+            _chain.Add(candidateBlock);
             _miningJobs.Clear();
 
-            UpdateCandidateBlockData(candidateBlock, miningResult);
+            UpdateCandidateBlockData(candidateBlock, minedBlock);
             MoveBlockTransactionsToConfirmed(candidateBlock);
+
+            _peerSynchronizationService.BroadcastNewBlockNotification(
+                _chain.Count,
+                GetCumulativeDifficulty(),
+                _nodeSettings.NodeUrl);
 
             return BlockValidationResult.Ok;
         }
@@ -134,6 +141,8 @@ namespace Pickaxe.Blockchain.Domain
 
             _pendingTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
             UpdatePendingAccountBalances(transaction);
+
+            _peerSynchronizationService.BroadcastNewTransaction(transaction.ToCreateRequest());
 
             return CreateTransactionResult.Ok;
         }
@@ -199,12 +208,12 @@ namespace Pickaxe.Blockchain.Domain
 
         public IList<Block> GetAllBlocks()
         {
-            return _blockchain.ToList();
+            return _chain.ToList();
         }
 
         public Block GetBlock(int index)
         {
-            return _blockchain.ElementAtOrDefault(index);
+            return _chain.ElementAtOrDefault(index);
         }
 
         public NodeInfo GetNodeInfo()
@@ -213,12 +222,12 @@ namespace Pickaxe.Blockchain.Domain
             {
                 About = _nodeSettings.About,
                 NodeId = _nodeSettings.NodeId,
-                ChainId = _blockchain.ElementAt(0).DataHash.ToHex(),
+                ChainId = _chain.ElementAt(0).DataHash.ToHex(),
                 NodeUrl = _nodeSettings.NodeUrl,
-                Peers = _peersUpdateService.GetPeersCount(),
+                Peers = _peerSynchronizationService.GetPeersCount(),
                 CurrentDifficulty = _nodeSettings.CurrentDifficulty,
-                BlocksCount = _blockchain.Count,
-                CumulativeDifficulty = _blockchain.Sum(b => b.Difficulty),
+                BlocksCount = _chain.Count,
+                CumulativeDifficulty = GetCumulativeDifficulty(),
                 ConfirmedTransactions = _confirmedTransactions.Count,
                 PendingTransactions = _pendingTransactions.Count
             };
@@ -229,15 +238,15 @@ namespace Pickaxe.Blockchain.Domain
             return new DebugInfo
             {
                 SelfUrl = _nodeSettings.NodeUrl,
-                Blocks = _blockchain.ToList()
+                Blocks = _chain.ToList()
             };
         }
 
         public void ResetChain()
         {
-            _blockchain.Dispose();
+            _chain.Dispose();
             Block genesisBlock = Block.CreateGenesisBlock();
-            _blockchain = new BlockingCollection<Block>() { genesisBlock };
+            _chain = new BlockingCollection<Block>() { genesisBlock };
             _confirmedTransactions.Clear();
             _accountBalances.Clear();
             AddGenesisTransactionsAsConfirmed(genesisBlock.Transactions);
@@ -362,9 +371,14 @@ namespace Pickaxe.Blockchain.Domain
             return 0;
         }
 
+        private long GetCumulativeDifficulty()
+        {
+            return (long)_chain.Sum(b => Math.Pow(16, b.Difficulty));
+        }
+
         private static void UpdateCandidateBlockData(
             Block candidateBlock,
-            MiningResult miningResult)
+            MinedBlock miningResult)
         {
             candidateBlock.MinerProvidedHash = miningResult.BlockHash;
             candidateBlock.DateCreated = miningResult.DateCreated;

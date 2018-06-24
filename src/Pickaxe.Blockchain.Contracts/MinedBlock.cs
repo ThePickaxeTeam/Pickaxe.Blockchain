@@ -2,7 +2,7 @@
 
 namespace Pickaxe.Blockchain.Contracts
 {
-    public class MiningJobResult
+    public class MinedBlock
     {
         [Required]
         public string BlockDataHash { get; set; }

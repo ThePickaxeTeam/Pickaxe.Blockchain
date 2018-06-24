@@ -1,4 +1,5 @@
 ﻿using Pickaxe.Blockchain.Contracts;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.Clients
@@ -7,10 +8,14 @@ namespace Pickaxe.Blockchain.Clients
     {
         Task<Response<MiningJob>> GetMiningJob(string minerAddress);
 
-        Task<Response<Block>> SubmitMiningJob(
-            MiningJobResult result,
+        Task<Response<Block>> SubmitMinedBlock(
+            MinedBlock miningJobResult,
             string minerAddress);
 
         Task<Response<Transaction>> CreateTransaction(CreateTransactionRequest request);
+
+        Task<Response<EmptyPayload>> NotifyNewBlock(NewBlockNotification notification);
+
+        Task<Response<List<Block>>> GetAllBlocks();
     }
 }

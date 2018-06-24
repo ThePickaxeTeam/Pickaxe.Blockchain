@@ -16,7 +16,7 @@
 
         public int BlocksCount { get; set; }
 
-        public int CumulativeDifficulty { get; set; }
+        public long CumulativeDifficulty { get; set; }
 
         public int ConfirmedTransactions { get; set; }
 

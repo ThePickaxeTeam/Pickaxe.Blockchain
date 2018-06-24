@@ -2,7 +2,7 @@
 
 namespace Pickaxe.Blockchain.Domain.Models
 {
-    public class MiningResult
+    public class MinedBlock
     {
         public string MinerAddress { get; set; }
 

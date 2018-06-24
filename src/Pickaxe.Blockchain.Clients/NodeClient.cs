@@ -23,15 +23,14 @@ namespace Pickaxe.Blockchain.Clients
 
         public async Task<Response<MiningJob>> GetMiningJob(string minerAddress)
         {
-            // Create a GET request to Node
-            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"api/miningjobs/{minerAddress}");
+            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"api/mining/get-mining-job/{minerAddress}");
             return await SendRequest<MiningJob>(requestMessage).ConfigureAwait(false);
         }
 
-        public async Task<Response<Block>> SubmitMiningJob(MiningJobResult result, string minerAddress)
+        public async Task<Response<Block>> SubmitMinedBlock(MinedBlock block, string minerAddress)
         {
-            var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/miningjobs/{minerAddress}");
-            requestMessage.Content = SerializeRequestAsJson(result);
+            var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/mining/submit-mined-block/{minerAddress}");
+            requestMessage.Content = SerializeRequestAsJson(block);
             return await SendRequest<Block>(requestMessage).ConfigureAwait(false);
         }
 
@@ -40,6 +39,19 @@ namespace Pickaxe.Blockchain.Clients
             var requestMessage = BuildRequestMessage(HttpMethod.Post, "api/transactions/send");
             requestMessage.Content = SerializeRequestAsJson(request);
             return await SendRequest<Transaction>(requestMessage).ConfigureAwait(false);
+        }
+
+        public async Task<Response<EmptyPayload>> NotifyNewBlock(NewBlockNotification notification)
+        {
+            var requestMessage = BuildRequestMessage(HttpMethod.Post, $"api/peers/notify-new-block");
+            requestMessage.Content = SerializeRequestAsJson(notification);
+            return await SendRequest<EmptyPayload>(requestMessage).ConfigureAwait(false);
+        }
+
+        public async Task<Response<List<Block>>> GetAllBlocks()
+        {
+            var requestMessage = BuildRequestMessage(HttpMethod.Get, $"api/blocks");
+            return await SendRequest<List<Block>>(requestMessage).ConfigureAwait(false);
         }
 
         private static StringContent SerializeRequestAsJson<T>(T request)

@@ -4,23 +4,24 @@ using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain;
 using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Extensions;
-using Pickaxe.Blockchain.Domain.Models;
 using Block = Pickaxe.Blockchain.Domain.Models.Block;
+using MinedBlock = Pickaxe.Blockchain.Domain.Models.MinedBlock;
+using MinedBlockContract = Pickaxe.Blockchain.Contracts.MinedBlock;
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class MiningJobsController : BaseController
+    public class MiningController : BaseController
     {
-        public MiningJobsController(INodeService nodeService)
+        public MiningController(INodeService nodeService)
             : base(nodeService)
         {
         }
 
-        // GET: api/miningjobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
-        [HttpGet("{minerAddress}", Name = "Get")]
-        public IActionResult Get(string minerAddress)
+        // GET: api/mining/get-mining-job/f51362b7351ef62253a227a77751ad9b2302f911
+        [HttpGet("get-mining-job/{minerAddress}", Name = "Get")]
+        public IActionResult GetMiningJob(string minerAddress)
         {
             if (string.IsNullOrWhiteSpace(minerAddress))
             {
@@ -33,14 +34,14 @@ namespace Pickaxe.Blockchain.Api.Controllers
             return Ok(job);
         }
 
-        // POST: api/miningjobs/687422eEA2cB73B5d3e242bA5456b782919AFc85
-        [HttpPost("{minerAddress}", Name = "Post")]
-        public IActionResult Post(string minerAddress, [FromBody]MiningJobResult value)
+        // POST: api/mining/submit-mined-block/f51362b7351ef62253a227a77751ad9b2302f911
+        [HttpPost("submit-mined-block/{minerAddress}", Name = "Post")]
+        public IActionResult SubmitMinedBlock(string minerAddress, [FromBody]MinedBlockContract block)
         {
-            MiningResult miningResult = value.ToMiningResult(minerAddress);
+            MinedBlock minedBlock = block.ToDomainModel(minerAddress);
 
             BlockValidationResult validationResult = NodeService.TryAddBlock(
-                miningResult,
+                minedBlock,
                 out Block candidateBlock);
 
             if (validationResult != BlockValidationResult.Ok)

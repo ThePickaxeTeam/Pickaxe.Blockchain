@@ -54,7 +54,7 @@ namespace Pickaxe.Blockchain.Miner
                     if (guess.StartsWith(difficultyCheck))
                     {
                         // block found, send it to the node
-                        bool submitted = await SubmitMiningResult(
+                        bool submitted = await SubmitMinedBlock(
                             nodeClient,
                             minerAddress,
                             5,
@@ -84,7 +84,7 @@ namespace Pickaxe.Blockchain.Miner
             } while (true);
         }
 
-        private static async Task<bool> SubmitMiningResult(
+        private static async Task<bool> SubmitMinedBlock(
             INodeClient nodeClient,
             string minerAddress,
             int maxRetries,
@@ -93,7 +93,7 @@ namespace Pickaxe.Blockchain.Miner
             ulong nonce,
             string computedHash)
         {
-            MiningJobResult result = new MiningJobResult
+            MinedBlock block = new MinedBlock
             {
                 BlockDataHash = blockDataHash,
                 DateCreated = dateCreated.Iso8601Formatted(),
@@ -106,7 +106,7 @@ namespace Pickaxe.Blockchain.Miner
             do
             {
                 retries++;
-                response = await nodeClient.SubmitMiningJob(result, minerAddress).ConfigureAwait(false);
+                response = await nodeClient.SubmitMinedBlock(block, minerAddress).ConfigureAwait(false);
             } while (response.Status == Status.Failed && retries < maxRetries);
 
             return response.Status == Status.Success;
