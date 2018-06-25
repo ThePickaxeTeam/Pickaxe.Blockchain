@@ -1,5 +1,4 @@
-﻿using Nethereum.Hex.HexConvertors.Extensions;
-using Pickaxe.Blockchain.Common;
+﻿using Pickaxe.Blockchain.Common;
 using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Serialization;
 using System;

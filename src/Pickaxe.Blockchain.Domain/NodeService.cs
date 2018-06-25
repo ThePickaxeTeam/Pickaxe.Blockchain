@@ -1,12 +1,13 @@
 ﻿using Nethereum.Hex.HexConvertors.Extensions;
 using Pickaxe.Blockchain.Common;
+using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Domain.Enums;
-using Pickaxe.Blockchain.Domain.Mappers;
 using Pickaxe.Blockchain.Domain.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.Domain
 {
@@ -142,7 +143,7 @@ namespace Pickaxe.Blockchain.Domain
             _pendingTransactions.TryAdd(transaction.DataHash.ToHex(), transaction);
             UpdatePendingAccountBalances(transaction);
 
-            _peerSynchronizationService.BroadcastNewTransaction(transaction.ToCreateRequest());
+            _peerSynchronizationService.BroadcastNewTransaction(transaction);
 
             return CreateTransactionResult.Ok;
         }
@@ -242,6 +243,11 @@ namespace Pickaxe.Blockchain.Domain
             };
         }
 
+        public Dictionary<string, string> GetPeers()
+        {
+            return _peerSynchronizationService.GetPeers();
+        }
+
         public void ResetChain()
         {
             _chain.Dispose();
@@ -253,6 +259,18 @@ namespace Pickaxe.Blockchain.Domain
 
             _pendingTransactions.Clear();
             _miningJobs.Clear();
+        }
+
+        public async Task SynchronizeChain(string peerUrl)
+        {
+            List<Block> peerChain =
+                await _peerSynchronizationService.GetAllBlocks(peerUrl).ConfigureAwait(false);
+            if (peerChain.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            // TODO: validate peer chain
         }
 
         private void MoveBlockTransactionsToConfirmed(Block candidateBlock)

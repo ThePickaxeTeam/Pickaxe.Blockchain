@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Pickaxe.Blockchain.Contracts;
 using Pickaxe.Blockchain.Domain;
+using System.Collections.Generic;
 
 namespace Pickaxe.Blockchain.Api.Controllers
 {
@@ -13,10 +14,18 @@ namespace Pickaxe.Blockchain.Api.Controllers
         {
         }
 
+        // GET
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            Dictionary<string, string> peers = NodeService.GetPeers();
+            return Ok(peers);
+        }
+
         [HttpPost("notify-new-block")]
         public IActionResult NotifyNewBlock([FromBody]NewBlockNotification notification)
         {
-            // TODO: get all blocks from sender node and synchronize chains
+            NodeService.SynchronizeChain(notification.NodeUrl);
             return Ok();
         }
     }

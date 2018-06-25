@@ -1,10 +1,13 @@
-﻿using Pickaxe.Blockchain.Contracts;
+﻿using Pickaxe.Blockchain.Domain.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.Domain
 {
     public interface IPeerSynchronizationService
     {
+        Dictionary<string, string> GetPeers();
+
         int GetPeersCount();
 
         Task BroadcastNewBlockNotification(
@@ -12,6 +15,8 @@ namespace Pickaxe.Blockchain.Domain
             long cumulativeDifficulty,
             string nodeUrl);
 
-        Task BroadcastNewTransaction(CreateTransactionRequest request);
+        Task BroadcastNewTransaction(Transaction transaction);
+
+        Task<List<Block>> GetAllBlocks(string peerUrl);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Pickaxe.Blockchain.Domain.Enums;
 using Pickaxe.Blockchain.Domain.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Pickaxe.Blockchain.Domain
 {
@@ -32,6 +33,10 @@ namespace Pickaxe.Blockchain.Domain
 
         DebugInfo GetDebugInfo();
 
+        Dictionary<string, string> GetPeers();
+
         void ResetChain();
+
+        Task SynchronizeChain(string peerUrl);
     }
 }

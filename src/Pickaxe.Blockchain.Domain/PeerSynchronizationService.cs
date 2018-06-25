@@ -1,7 +1,14 @@
 ﻿using Pickaxe.Blockchain.Clients;
 using Pickaxe.Blockchain.Contracts;
+using Pickaxe.Blockchain.Domain.Mappers;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Block = Pickaxe.Blockchain.Domain.Models.Block;
+using BlockContract = Pickaxe.Blockchain.Contracts.Block;
+using Transaction = Pickaxe.Blockchain.Domain.Models.Transaction;
+using TransactionContract = Pickaxe.Blockchain.Contracts.Transaction;
 
 namespace Pickaxe.Blockchain.Domain
 {
@@ -18,6 +25,11 @@ namespace Pickaxe.Blockchain.Domain
         {
             _peers = new ConcurrentDictionary<string, string>();
             _peerNodeClients = new ConcurrentDictionary<string, INodeClient>();
+        }
+
+        public Dictionary<string, string> GetPeers()
+        {
+            return _peers.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
         public int GetPeersCount()
@@ -43,12 +55,20 @@ namespace Pickaxe.Blockchain.Domain
             }
         }
 
-        public async Task BroadcastNewTransaction(CreateTransactionRequest request)
+        public async Task BroadcastNewTransaction(Transaction transaction)
         {
+            CreateTransactionRequest request = transaction.ToCreateRequest();
+
             foreach (string peerBaseUrl in _peers.Values)
             {
                 await SendCreateTransactionRequest(request, peerBaseUrl, 5).ConfigureAwait(false);
             }
+        }
+
+        public async Task<List<Block>> GetAllBlocks(string peerUrl)
+        {
+            List<BlockContract> peerChain = await GetAllBlocks(peerUrl, 5).ConfigureAwait(false);
+            return peerChain.Select(b => b.ToDomainModel()).ToList();
         }
 
         private async Task SendNewBlockNotification(
@@ -56,6 +76,11 @@ namespace Pickaxe.Blockchain.Domain
             string peerUrl,
             int maxRetries)
         {
+            if (!_peerNodeClients.ContainsKey(peerUrl))
+            {
+                return;
+            }
+
             INodeClient nodeClient = _peerNodeClients[peerUrl];
             Response<EmptyPayload> response;
             int retries = 0;
@@ -71,14 +96,45 @@ namespace Pickaxe.Blockchain.Domain
             string peerUrl,
             int maxRetries)
         {
+            if (!_peerNodeClients.ContainsKey(peerUrl))
+            {
+                return;
+            }
+
             INodeClient nodeClient = _peerNodeClients[peerUrl];
-            Response<Transaction> response;
+            Response<TransactionContract> response;
             int retries = 0;
             do
             {
                 retries++;
                 response = await nodeClient.CreateTransaction(request).ConfigureAwait(false);
             } while (response.Status == Status.Failed && retries < maxRetries);
+        }
+
+        private async Task<List<BlockContract>> GetAllBlocks(string peerUrl, int maxRetries)
+        {
+            if (!_peerNodeClients.ContainsKey(peerUrl))
+            {
+                return new List<BlockContract>();
+            }
+
+            INodeClient nodeClient = _peerNodeClients[peerUrl];
+            Response<List<BlockContract>> response;
+            int retries = 0;
+            do
+            {
+                retries++;
+                response = await nodeClient.GetAllBlocks().ConfigureAwait(false);
+            } while (response.Status == Status.Failed && retries < maxRetries);
+
+            if (response.Status == Status.Success)
+            {
+                return response.Payload;
+            }
+            else
+            {
+                return new List<BlockContract>();
+            }
         }
     }
 }

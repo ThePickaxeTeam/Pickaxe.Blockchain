@@ -1,6 +1,9 @@
 ﻿using Pickaxe.Blockchain.Common.Extensions;
 using Pickaxe.Blockchain.Contracts;
+using System;
 using Transaction = Pickaxe.Blockchain.Domain.Models.Transaction;
+using TransactionContract = Pickaxe.Blockchain.Contracts.Transaction;
+
 
 namespace Pickaxe.Blockchain.Domain.Mappers
 {
@@ -21,6 +24,25 @@ namespace Pickaxe.Blockchain.Domain.Mappers
                 {
                     transaction.SenderSignature[0],
                     transaction.SenderSignature[1]
+                }
+            };
+        }
+
+        public static Transaction ToDomainModel(this TransactionContract contract)
+        {
+            return new Transaction
+            {
+                From = contract.From,
+                To = contract.To,
+                Value = contract.Value,
+                Fee = contract.Fee,
+                DateCreated = DateTime.Parse(contract.DateCreated).ToUniversalTime(),
+                Data = contract.Data,
+                SenderPublicKey = contract.SenderPubKey,
+                SenderSignature = new string[]
+                {
+                    contract.SenderSignature[0],
+                    contract.SenderSignature[1]
                 }
             };
         }
